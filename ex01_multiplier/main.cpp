@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "adder.hpp"
+#include "multiplier.hpp"
 #include <sstream>
 #include <bitset>
 
@@ -32,7 +32,7 @@ int	main(int argc, char **argv)
 
 	if (argc != 3)
 	{
-		cerr << "adder require two numbers as arguments\n";
+		cerr << "multiplier require two numbers as arguments\n";
 		return (1);
 	}
 	
@@ -50,7 +50,8 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	
-	uint32_t	c = adder(a, b);
+	uint32_t	c = multiplier(a, b);
+
 	cout << "   " << bitset<32>(a) << " (" << a << ")\n";
 	cout << " * " << bitset<32>(b) << " (" << b  << ")\n";
 	cout << "__________________________________\n";

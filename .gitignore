@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+adder
+multiplier
+gray_code
+eval_formula
