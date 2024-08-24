@@ -10,24 +10,27 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "eval_formula.hpp"
+#include "print_truth_table.hpp"
 
 int	main()
 {
 	vector<string>	formulas = {
-		"10&",
-		"10|",
-		"11>",
-		"10=",
-		"1011||=",
-		"10|1&",
-		"101|&"
+		"AB&",
+		"AB|",
+		"AB>",
+		"AB=",
+		"ABCD||=",
+		"AB|C&",
+		"ABC|&",
+		"ABCDEFG||||||",
+		//"ABCDEFGHIJKLMNOPQRSTUVWXYZ|||||||||||||||||||||||||"
 	};
 
 	for	(auto form : formulas)
 	{
-		bool	result = eval_formula(form);
-		cout << form << "\n" << result << "\n\n";
+		cout	<< form << "\n";
+		print_truth_table(form);
+		cout << "\n";
 	}
 	return (0);
 }
