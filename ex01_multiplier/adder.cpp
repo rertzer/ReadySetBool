@@ -14,34 +14,34 @@
 
 static inline bool overflow(uint32_t a, uint32_t b);
 
-uint32_t adder(uint32_t a, uint32_t b, bool *over) {
-  uint32_t sum = 0;
-  uint32_t carry = 0;
-  if (overflow(a, b)) {
-    *over = true;
-  };
+uint32_t adder(uint32_t a, uint32_t b, bool* over) {
+	uint32_t sum = 0;
+	uint32_t carry = 0;
+	if (overflow(a, b)) {
+		*over = true;
+	};
 
-  sum = a ^ b;
-  carry = (a & b) << 1;
+	sum = a ^ b;
+	carry = (a & b) << 1;
 
-  while (carry != 0) {
-    if (overflow(sum, carry)) {
-      *over = true;
-    }
-    uint32_t tmp = sum;
-    sum = tmp ^ carry;
-    carry = (tmp & carry) << 1;
-  }
+	while (carry != 0) {
+		if (overflow(sum, carry)) {
+			*over = true;
+		}
+		uint32_t tmp = sum;
+		sum = tmp ^ carry;
+		carry = (tmp & carry) << 1;
+	}
 
-  return (sum);
+	return (sum);
 }
 
 static inline bool overflow(uint32_t a, uint32_t b) {
-  bool over = false;
+	bool over = false;
 
-  if ((a & 0x80000000) && (b & 0x80000000)) {
-    over = true;
-  }
+	if ((a & 0x80000000) && (b & 0x80000000)) {
+		over = true;
+	}
 
-  return (over);
+	return (over);
 }
