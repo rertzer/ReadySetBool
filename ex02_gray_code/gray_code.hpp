@@ -10,14 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef GRAY_CODE_HPP
-# define GRAY_CODE_HPP
+#define GRAY_CODE_HPP
 
-# include <iostream>
-# include <string>
-# include <vector>
+#include <stdint.h>
 
-using namespace std;
+uint32_t gray_code(uint32_t n);
 
-uint32_t	gray_code(uint32_t n);
-
-#endif //! GRAY_CODE_HPP
+#endif	//! GRAY_CODE_HPP

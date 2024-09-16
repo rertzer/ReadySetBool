@@ -11,16 +11,13 @@
 /* ************************************************************************** */
 
 #ifndef MULTIPLIER_HPP
-# define MULTIPLIER_HPP
+#define MULTIPLIER_HPP
 
-# include <iostream>
-# include <string>
-# include <vector>
-
-# include "adder.hpp"
+#include "adder.hpp"
+#include <iostream>
 
 using namespace std;
 
-uint32_t	multiplier(uint32_t a, uint32_t b);
+uint32_t multiplier(uint32_t a, uint32_t b);
 
 #endif //! MULTIPLIER_HPP

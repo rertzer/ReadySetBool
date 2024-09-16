@@ -10,23 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <iostream>
+#include <vector>
 #include "eval_formula.hpp"
 
-int	main()
-{
-	vector<string>	formulas = {
-		"10&",
-		"10|",
-		"11>",
-		"10=",
-		"1011||=",
-		"10|1&",
-		"101|&"
-	};
+int main() {
+	vector<string> formulas = {"10&", "10|", "11>", "10=", "1011||=", "10|1&", "101|&"};
 
-	for	(auto form : formulas)
-	{
-		bool	result = eval_formula(form);
+	for (auto form : formulas) {
+		bool result = eval_formula(form);
 		cout << form << "\n" << result << "\n\n";
 	}
 	return (0);
