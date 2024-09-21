@@ -28,7 +28,7 @@ class Formula {
 
 	void   rewrite();
 	void   erase();
-	void   fromString(string reversePolish);
+	void   fromString(string& reversePolish);
 	string reversePolish() const;
 	void   nnf();
 	void   print();
@@ -61,9 +61,11 @@ class Formula {
 	void	 rewriteEquivalence();
 	void	 rewriteExclusiveDisjunction();
 	void	 printNode(SuperStack<Formula*>& to_visit);
+	void	 printRoot(SuperStack<Formula*>& to_visit);
 	void	 printOp(SuperStack<Formula*>& to_visit);
 	void	 printNeg(SuperStack<Formula*>& to_visit);
-	void	 printVar(SuperStack<Formula*>& to_visit);
+	void	 printVar();
+	void	 printSymbol();
 	Kind	 kind;
 	Op		 op;
 	char	 name;

@@ -2,7 +2,7 @@ CXX = c++
 
 CXXFLAGS = -Wall -Wextra -Werror -g3
 
-NAME = negation 
+NAME = nnf 
 
 SRC_DIR = ./
 
@@ -10,7 +10,7 @@ OBJ_DIR = obj/
 
 INC_DIR = ./
 
-SOURCES = main.cpp nnf.cpp Formula.cpp
+SOURCES = main.cpp Formula.cpp
 
 OBJ = $(SOURCES:.cpp=.o)
 

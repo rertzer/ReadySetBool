@@ -1,6 +1,5 @@
 #include "Formula.hpp"
-#include <cctype>
-#include <ios>
+#include "SuperStack.hpp"
 
 Formula::Formula()
 	: kind(Kind::Root),
@@ -29,7 +28,9 @@ Formula::Formula(char s)
 	  visited(Visit::First),
 	  parent(nullptr),
 	  left_child(nullptr),
-	  right_child(nullptr) {}
+	  right_child(nullptr) {
+	cerr << "creating " << s << endl;
+}
 
 Formula::Formula(Formula const& f) {
 	*this = f;
@@ -76,7 +77,7 @@ void Formula::erase() {
 		this->~Formula();
 }
 
-void Formula::fromString(string rp) {
+void Formula::fromString(string& rp) {
 	if (kind != Kind::Root)
 		throw(InternalException());
 	SuperStack<Formula*> to_visit;
@@ -93,15 +94,19 @@ void Formula::addChildsFromString(string& rp, SuperStack<Formula*>& to_visit) {
 
 	switch (current_node->kind) {
 		case Kind::Root:
+			cerr << "adding to root\n";
 			addChildToRoot(rp, to_visit);
 			break;
 		case Kind::Op:
-			addChildsToOp(rp, to_visit);
+			cerr << "adding to op\n";
+			current_node->addChildsToOp(rp, to_visit);
 			break;
 		case Kind::Neg:
-			addChildToNeg(rp, to_visit);
+			cerr << "adding to neg\n";
+			current_node->addChildToNeg(rp, to_visit);
 			break;
 		default:
+			cerr << "adding to default\n";
 			throw(InvalidStringException());
 			break;
 	}
@@ -210,6 +215,7 @@ void Formula::print() {
 void Formula::printNode(SuperStack<Formula*>& to_visit) {
 	switch (kind) {
 		case Kind::Root:
+			printRoot(to_visit);
 			break;
 		case Kind::Op:
 			printOp(to_visit);
@@ -218,25 +224,67 @@ void Formula::printNode(SuperStack<Formula*>& to_visit) {
 			printNeg(to_visit);
 			break;
 		case Kind::Var:
-			printVar(to_visit);
+			printVar();
 			break;
 	}
+}
+
+void Formula::printRoot(SuperStack<Formula*>& to_visit) {
+	to_visit.push(left_child);
 }
 
 void Formula::printOp(SuperStack<Formula*>& to_visit) {
 	if (visited == Visit::First) {
 		cout << '(';
-		to_visit.push(left_child);
 		to_visit.push(this);
 		to_visit.push(right_child);
 		to_visit.push(this);
+		to_visit.push(left_child);
 		visited = Visit::Second;
 	} else if (visited == Visit::Second) {
 		printSymbol();
 		visited = Visit::Third;
+	} else if (visited == Visit::Third) {
+		cout << ')';
+		visited = Visit::First;
 	}
 }
 
-void Formula::printNeg(SuperStack<Formula*>& to_visit) {}
+void Formula::printNeg(SuperStack<Formula*>& to_visit) {
+	if (visited == Visit::First) {
+		cout << "![";
+		to_visit.push(this);
+		to_visit.push(left_child);
+		visited = Visit::Second;
+	} else if (visited == Visit::Second) {
+		cout << ']';
+		visited = Visit::First;
+	}
+}
 
-void Formula::printVar(SuperStack<Formula*>& to_visit) {}
+void Formula::printVar() {
+	cout << name;
+}
+
+void Formula::printSymbol() {
+	switch (op) {
+		case Op::Conj:
+			cout << ")&(";
+			break;
+		case Op::Dis:
+			cout << ")|(";
+			break;
+		case Op::Edis:
+			cout << ")^(";
+			break;
+		case Op::Mcond:
+			cout << ")>(";
+			break;
+		case Op::Leq:
+			cout << ")=(";
+			break;
+		default:
+			throw(InvalidStringException());
+			break;
+	}
+}
