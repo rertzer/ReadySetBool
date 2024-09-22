@@ -28,9 +28,7 @@ Formula::Formula(char s)
 	  visited(Visit::First),
 	  parent(nullptr),
 	  left_child(nullptr),
-	  right_child(nullptr) {
-	cerr << "creating " << s << endl;
-}
+	  right_child(nullptr) {}
 
 Formula::Formula(Formula const& f) {
 	*this = f;
@@ -77,9 +75,135 @@ void Formula::erase() {
 		this->~Formula();
 }
 
+void Formula::removeDoubleNeg() {
+	SuperStack<Formula*> to_visit;
+	to_visit.push(this);
+	while (!to_visit.empty()) {
+		removeDoubleNegNode(to_visit);
+	}
+}
+
+void Formula::removeDoubleNegNode(SuperStack<Formula*>& to_visit) {
+	Formula* current_node = to_visit.popout();
+
+	if (current_node->left_child != nullptr) {
+		current_node->left_child = removeDoubleNegChild(to_visit, current_node->left_child);
+	}
+	if (current_node->right_child != nullptr) {
+		current_node->right_child = removeDoubleNegChild(to_visit, current_node->right_child);
+	}
+}
+
+Formula* Formula::removeDoubleNegChild(SuperStack<Formula*>& to_visit, Formula* child) {
+	Formula* kid = child;
+
+	if (child->kind == Kind::Neg && child->left_child->kind == Kind::Neg) {
+		kid = child->left_child->left_child;
+		child->left_child->~Formula();
+		child->~Formula();
+		to_visit.push(this);
+	} else {
+		to_visit.push(child);
+	}
+	return (kid);
+}
+
+string Formula::revertPolish() const {
+	SuperStack<Formula const*> to_visit;
+	string					   rp;
+	to_visit.push(this);
+	while (!to_visit.empty()) {
+		revertNode(rp, to_visit);
+	}
+	reverse(rp.begin(), rp.end());
+	return (rp);
+}
+
+void Formula::revertNode(string& rp, SuperStack<Formula const*>& to_visit) const {
+	Formula const* current_node = to_visit.popout();
+
+	switch (current_node->kind) {
+		case Kind::Root:
+			current_node->revertRoot(to_visit);
+			break;
+		case Kind::Op:
+			current_node->revertOp(rp, to_visit);
+			break;
+		case Kind::Neg:
+			current_node->revertNeg(rp, to_visit);
+			break;
+		case Kind::Var:
+			current_node->revertVar(rp);
+			break;
+	}
+}
+
+void Formula::revertRoot(SuperStack<Formula const*>& to_reverse) const {
+	to_reverse.push(left_child);
+}
+
+void Formula::revertOp(string& rp, SuperStack<Formula const*>& to_reverse) const {
+	char s = getSymbol();
+	rp.push_back(s);
+	to_reverse.push(right_child);
+	to_reverse.push(left_child);
+}
+
+void Formula::revertNeg(string& rp, SuperStack<Formula const*>& to_reverse) const {
+	char s = getSymbol();
+	rp.push_back(s);
+	to_reverse.push(left_child);
+}
+
+void Formula::revertVar(string& rp) const {
+	char s = getSymbol();
+	rp.push_back(s);
+}
+
+char Formula::getSymbol() const {
+	char s;
+	switch (kind) {
+		case Kind::Op:
+			s = getOpSymbol();
+			break;
+		case Kind::Neg:
+			s = '!';
+			break;
+		case Kind::Var:
+			s = name;
+			break;
+		case Kind::Root:
+			throw(InternalException());
+			break;
+	}
+	return s;
+}
+
+char Formula::getOpSymbol() const {
+	char s;
+	switch (op) {
+		case Op::Dis:
+			s = '|';
+			break;
+		case Op::Leq:
+			s = '=';
+			break;
+		case Op::Conj:
+			s = '&';
+			break;
+		case Op::Edis:
+			s = '^';
+			break;
+		case Op::Mcond:
+			s = '>';
+			break;
+		case Op::Na:
+			throw(InternalException());
+	}
+	return (s);
+}
+
 void Formula::fromString(string& rp) {
-	if (kind != Kind::Root)
-		throw(InternalException());
 	SuperStack<Formula*> to_visit;
 	to_visit.push(this);
 	while (!rp.empty()) {
@@ -94,19 +218,15 @@ void Formula::addChildsFromString(string& rp, SuperStack<Formula*>& to_visit) {
 
 	switch (current_node->kind) {
 		case Kind::Root:
-			cerr << "adding to root\n";
-			addChildToRoot(rp, to_visit);
+			current_node->addChildToRoot(rp, to_visit);
 			break;
 		case Kind::Op:
-			cerr << "adding to op\n";
 			current_node->addChildsToOp(rp, to_visit);
 			break;
 		case Kind::Neg:
-			cerr << "adding to neg\n";
 			current_node->addChildToNeg(rp, to_visit);
 			break;
 		default:
-			cerr << "adding to default\n";
 			throw(InvalidStringException());
 			break;
 	}
@@ -120,14 +240,20 @@ void Formula::addChildToRoot(string& rp, SuperStack<Formula*>& to_visit) {
 }
 
 void Formula::addChildsToOp(string& rp, SuperStack<Formula*>& to_visit) {
-	char s = extractNextSymbol(rp);
-	left_child = new Formula(s);
-	if (left_child->kind != Kind::Var)
-		to_visit.push(left_child);
-	s = extractNextSymbol(rp);
-	right_child = new Formula(s);
-	if (right_child->kind != Kind::Var)
-		to_visit.push(right_child);
+	if (visited == Visit::First) {
+		char s = extractNextSymbol(rp);
+		left_child = new Formula(s);
+		to_visit.push(this);
+		if (left_child->kind != Kind::Var)
+			to_visit.push(left_child);
+		visited = Visit::Second;
+	} else if (visited == Visit::Second) {
+		char s = extractNextSymbol(rp);
+		right_child = new Formula(s);
+		if (right_child->kind != Kind::Var)
+			to_visit.push(right_child);
+		visited = Visit::First;
+	}
 }
 
 void Formula::addChildToNeg(string& rp, SuperStack<Formula*>& to_visit) {
@@ -210,6 +336,7 @@ void Formula::print() {
 		Formula* node = to_visit.popout();
 		node->printNode(to_visit);
 	}
+	cout << endl;
 }
 
 void Formula::printNode(SuperStack<Formula*>& to_visit) {

@@ -1,5 +1,6 @@
 #ifndef FORMULA_HPP
 #define FORMULA_HPP
+#include <algorithm>
 #include <iostream>
 #include <stack>
 #include <string>
@@ -29,9 +30,12 @@ class Formula {
 	void   rewrite();
 	void   erase();
 	void   fromString(string& reversePolish);
-	string reversePolish() const;
+	string revertPolish() const;
+	void   removeDoubleNeg();
 	void   nnf();
 	void   print();
+	char   getSymbol() const;
+	char   getOpSymbol() const;
 
    private:
 	class InternalException : public exception {
@@ -56,10 +60,17 @@ class Formula {
 	Kind	 charToKind(char s);
 	Op		 charToOp(char s);
 	char	 charToName(char s);
+	void	 removeDoubleNegNode(SuperStack<Formula*>& to_visit);
+	Formula* removeDoubleNegChild(SuperStack<Formula*>& to_visit, Formula* child);
 	void	 rewriteDoubleNegation();
 	void	 rewriteMaterialCondition();
 	void	 rewriteEquivalence();
 	void	 rewriteExclusiveDisjunction();
+	void	 revertNode(string& rp, SuperStack<Formula const*>& to_reverse) const;
+	void	 revertRoot(SuperStack<Formula const*>& to_reverse) const;
+	void	 revertOp(string& rp, SuperStack<Formula const*>& to_reverse) const;
+	void	 revertNeg(string& rp, SuperStack<Formula const*>& to_reverse) const;
+	void	 revertVar(string& rp) const;
 	void	 printNode(SuperStack<Formula*>& to_visit);
 	void	 printRoot(SuperStack<Formula*>& to_visit);
 	void	 printOp(SuperStack<Formula*>& to_visit);
