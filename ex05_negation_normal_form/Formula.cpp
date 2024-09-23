@@ -75,37 +75,138 @@ void Formula::erase() {
 		this->~Formula();
 }
 
-void Formula::removeDoubleNeg() {
+void Formula::rewrite() {
 	SuperStack<Formula*> to_visit;
 	to_visit.push(this);
 	while (!to_visit.empty()) {
-		removeDoubleNegNode(to_visit);
+		rewriteNode(to_visit);
 	}
 }
 
-void Formula::removeDoubleNegNode(SuperStack<Formula*>& to_visit) {
+void Formula::rewriteNode(SuperStack<Formula*>& to_visit) {
 	Formula* current_node = to_visit.popout();
 
 	if (current_node->left_child != nullptr) {
-		current_node->left_child = removeDoubleNegChild(to_visit, current_node->left_child);
+		current_node->left_child = rewriteChild(to_visit, current_node->left_child);
 	}
 	if (current_node->right_child != nullptr) {
-		current_node->right_child = removeDoubleNegChild(to_visit, current_node->right_child);
+		current_node->right_child = rewriteChild(to_visit, current_node->right_child);
 	}
 }
 
-Formula* Formula::removeDoubleNegChild(SuperStack<Formula*>& to_visit, Formula* child) {
+Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child;
+	if (child->kind == Kind::Neg) {
+		if (child->left_child->kind == Kind::Neg) {
+			kid = rewriteDoubleNegation(to_visit, child);
+		} else if (child->left_child->op == Op::Conj) {
+			kid = rewriteMorganConj(to_visit, child);
+		} else if (child->left_child->op == Op::Dis) {
+			kid = rewriteMorganDis(to_visit, child);
+		} else {
+			to_visit.push(child);
+		}
 
-	if (child->kind == Kind::Neg && child->left_child->kind == Kind::Neg) {
-		kid = child->left_child->left_child;
-		child->left_child->~Formula();
-		child->~Formula();
-		to_visit.push(this);
+	} else if (child->kind == Kind::Op) {
+		switch (child->op) {
+			case Op::Mcond:
+				child->rewriteMaterialCondition(to_visit);
+				break;
+			case Op::Leq:
+				child->rewriteEquivalence(to_visit);
+				break;
+			case Op::Edis:
+				child->rewriteExclusiveDisjunction(to_visit);
+				break;
+			default:
+				to_visit.push(child);
+				break;
+		}
 	} else {
 		to_visit.push(child);
 	}
+
 	return (kid);
+}
+
+Formula* Formula::rewriteMorganConj(SuperStack<Formula*>& to_visit, Formula* child) {
+	Formula* kid = child->left_child;
+	child->~Formula();
+	kid->op = Op::Dis;
+	kid->left_child = kid->left_child->negate();
+	kid->right_child = kid->right_child->negate();
+	to_visit.push(this);
+
+	return (kid);
+}
+
+Formula* Formula::rewriteMorganDis(SuperStack<Formula*>& to_visit, Formula* child) {
+	Formula* kid = child->left_child;
+	child->~Formula();
+	kid->op = Op::Conj;
+	kid->left_child = kid->left_child->negate();
+	kid->right_child = kid->right_child->negate();
+	to_visit.push(this);
+
+	return (kid);
+}
+
+Formula* Formula::rewriteDoubleNegation(SuperStack<Formula*>& to_visit, Formula* child) {
+	Formula* kid = child->left_child->left_child;
+	child->left_child->~Formula();
+	child->~Formula();
+	to_visit.push(this);
+
+	return (kid);
+}
+
+void Formula::rewriteMaterialCondition(SuperStack<Formula*>& to_visit) {
+	Formula* kid = left_child;
+	left_child = new Formula('!');
+	left_child->left_child = kid;
+	op = Op::Dis;
+	to_visit.push(this);
+}
+
+void Formula::rewriteEquivalence(SuperStack<Formula*>& to_visit) {
+	Formula* left_kid = left_child;
+	Formula* right_kid = right_child;
+
+	left_child = new Formula('>');
+	right_child = new Formula('>');
+
+	left_child->left_child = left_kid;
+	left_child->right_child = right_kid;
+	right_child->left_child = right_kid;
+	right_child->right_child = left_kid;
+
+	op = Op::Conj;
+
+	to_visit.push(this);
+}
+
+void Formula::rewriteExclusiveDisjunction(SuperStack<Formula*>& to_visit) {
+	Formula* left_kid = left_child;
+	Formula* right_kid = right_child;
+
+	left_child = new Formula('&');
+	right_child = new Formula('&');
+
+	left_child->left_child = left_kid;
+	left_child->right_child = right_kid->negate();
+	right_child->left_child = left_kid->negate();
+	right_child->right_child = right_kid;
+
+	op = Op::Dis;
+
+	to_visit.push(this);
+}
+
+Formula* Formula::negate() {
+	Formula* neg = new Formula('!');
+	neg->left_child = this;
+
+	return (neg);
 }
 
 string Formula::revertPolish() const {
@@ -116,6 +217,7 @@ string Formula::revertPolish() const {
 		revertNode(rp, to_visit);
 	}
 	reverse(rp.begin(), rp.end());
+
 	return (rp);
 }
 
@@ -145,8 +247,8 @@ void Formula::revertRoot(SuperStack<Formula const*>& to_reverse) const {
 void Formula::revertOp(string& rp, SuperStack<Formula const*>& to_reverse) const {
 	char s = getSymbol();
 	rp.push_back(s);
-	to_reverse.push(right_child);
 	to_reverse.push(left_child);
+	to_reverse.push(right_child);
 }
 
 void Formula::revertNeg(string& rp, SuperStack<Formula const*>& to_reverse) const {
@@ -242,16 +344,16 @@ void Formula::addChildToRoot(string& rp, SuperStack<Formula*>& to_visit) {
 void Formula::addChildsToOp(string& rp, SuperStack<Formula*>& to_visit) {
 	if (visited == Visit::First) {
 		char s = extractNextSymbol(rp);
-		left_child = new Formula(s);
+		right_child = new Formula(s);
 		to_visit.push(this);
-		if (left_child->kind != Kind::Var)
-			to_visit.push(left_child);
+		if (right_child->kind != Kind::Var)
+			to_visit.push(right_child);
 		visited = Visit::Second;
 	} else if (visited == Visit::Second) {
 		char s = extractNextSymbol(rp);
-		right_child = new Formula(s);
-		if (right_child->kind != Kind::Var)
-			to_visit.push(right_child);
+		left_child = new Formula(s);
+		if (left_child->kind != Kind::Var)
+			to_visit.push(left_child);
 		visited = Visit::First;
 	}
 }
