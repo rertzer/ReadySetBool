@@ -13,6 +13,7 @@ int main() {
 	rpolish.push_back("AB>");
 	rpolish.push_back("");
 	rpolish.push_back("AB^");
+	rpolish.push_back("ABCD&|&");
 	for (auto rp : rpolish) {
 		cout << "rpolish: " << rp << endl;
 		try {
