@@ -27,6 +27,7 @@ class Formula {
 	Formula& operator=(Formula const& f);
 	Formula& operator=(Formula&& f);
 
+	void   kill();
 	void   rewrite();
 	void   erase();
 	void   fromString(string& reversePolish);
