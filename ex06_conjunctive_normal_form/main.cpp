@@ -1,5 +1,5 @@
 #include <vector>
-#include "Formula.hpp"
+#include "cnf.hpp"
 
 int main() {
 	vector<pair<string, string>> rpolish;
@@ -23,17 +23,10 @@ int main() {
 	rpolish.push_back(make_pair("A!B!|!C&", ""));
 
 	for (auto rp : rpolish) {
-		cout << "rpolish: " << rp.first << endl;
 		try {
-			Formula cnf(rp.first);
-			cnf.print();
-			string reverted = cnf.revertPolish();
-			cout << reverted << endl;
-			cnf.cnf();
-			// cout << "double neg removed\n";
-			cnf.print();
-			reverted = cnf.revertPolish();
-			cout << "computed: " << reverted << endl;
+			cout << "rpolish:  " << rp.first << endl;
+			string cnf = conjunctive_normal_form(rp.first);
+			cout << "computed: " << cnf << endl;
 			cout << "expected: " << rp.second << endl << endl << endl;
 		} catch (const exception& e) {
 			cerr << e.what() << endl << endl;

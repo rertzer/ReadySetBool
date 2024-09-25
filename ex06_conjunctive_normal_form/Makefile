@@ -10,7 +10,7 @@ OBJ_DIR = obj/
 
 INC_DIR = ./
 
-SOURCES = main.cpp Formula.cpp
+SOURCES = main.cpp Formula.cpp cnf.cpp
 
 OBJ = $(SOURCES:.cpp=.o)
 
