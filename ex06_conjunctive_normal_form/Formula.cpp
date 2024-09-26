@@ -63,7 +63,13 @@ Formula& Formula::operator=(Formula const& f) {
 		name = f.name;
 		visited = f.visited;
 		parent = f.parent;
+		if (left_child != nullptr) {
+			delete left_child;
+		}
 		left_child = f.left_child;
+		if (right_child != nullptr) {
+			delete right_child;
+		}
 		right_child = f.right_child;
 	}
 	return (*this);
