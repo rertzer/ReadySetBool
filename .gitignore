@@ -37,3 +37,4 @@ eval_formula
 nnf
 cnf
 sat
+powerset
