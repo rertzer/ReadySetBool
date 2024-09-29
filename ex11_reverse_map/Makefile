@@ -10,7 +10,7 @@ OBJ_DIR = obj/
 
 INC_DIR = ./
 
-SOURCES = main.cpp reverse_map.cpp
+SOURCES = main.cpp map.cpp reverse_map.cpp
 
 OBJ = $(SOURCES:.cpp=.o)
 
