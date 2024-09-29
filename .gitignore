@@ -39,3 +39,5 @@ cnf
 sat
 powerset
 evalset
+map
+reverse_map
