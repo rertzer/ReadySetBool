@@ -11,8 +11,11 @@
 /* ************************************************************************** */
 
 #include "adder.hpp"
+#include <iostream>
 
 static inline bool overflow(uint32_t a, uint32_t b);
+
+using namespace std;
 
 uint32_t adder(uint32_t a, uint32_t b) {
 	uint32_t sum = 0;
@@ -38,11 +41,5 @@ uint32_t adder(uint32_t a, uint32_t b) {
 }
 
 static inline bool overflow(uint32_t a, uint32_t b) {
-	bool over = false;
-
-	if ((a & 0x80000000) && (b & 0x80000000)) {
-		over = true;
-	}
-
-	return (over);
+	return ((a & 0x80000000) && (b & 0x80000000));
 }

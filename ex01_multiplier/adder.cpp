@@ -37,11 +37,5 @@ uint32_t adder(uint32_t a, uint32_t b, bool* over) {
 }
 
 static inline bool overflow(uint32_t a, uint32_t b) {
-	bool over = false;
-
-	if ((a & 0x80000000) && (b & 0x80000000)) {
-		over = true;
-	}
-
-	return (over);
+	return ((bool)(a & 0x80000000) && (b & 0x80000000));
 }

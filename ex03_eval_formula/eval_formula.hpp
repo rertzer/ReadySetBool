@@ -13,7 +13,6 @@
 #ifndef EVAL_FORMULA_HPP
 #define EVAL_FORMULA_HPP
 
-#include <deque>
 #include <exception>
 #include <string>
 

@@ -11,19 +11,23 @@
 /* ************************************************************************** */
 
 #include "multiplier.hpp"
+#include <iostream>
+#include "adder.hpp"
+
+using namespace std;
 
 uint32_t multiplier(uint32_t a, uint32_t b) {
-  uint32_t result = 0;
-  bool over = false;
+	uint32_t result = 0;
+	bool	 over = false;
 
-  for (int shift = 0; shift < 32; ++shift) {
-    if ((b >> shift) & 1) {
-      result = adder(result, a << shift, &over);
-    }
-  }
-  if (over == true) {
-    cerr << "Warning: overflow\n";
-  }
+	for (int shift = 0; shift < 32; ++shift) {
+		if ((b >> shift) & 1) {
+			result = adder(result, a << shift, &over);
+		}
+	}
+	if (over == true) {
+		cerr << "Warning: overflow\n";
+	}
 
-  return (result);
+	return (result);
 }

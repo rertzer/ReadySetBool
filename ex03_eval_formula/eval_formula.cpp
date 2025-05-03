@@ -11,32 +11,24 @@
 /* ************************************************************************** */
 
 #include "eval_formula.hpp"
+#include <deque>
 
-bool eval_formula(std::string exp) {
-	std::deque<bool> filo;
-	opfun			 op = nullptr;
+static void handleValue(deque<bool>& filo, char c);
+static void handleNeg(deque<bool>& filo);
+static void handleOp(deque<bool>& filo, char c);
+
+using namespace std;
+
+bool eval_formula(string exp) {
+	deque<bool> filo;
 
 	for (size_t i = 0; i < exp.length(); ++i) {
 		if (isValue(exp[i])) {
-			filo.push_front(toBool(exp[i]));
+			handleValue(filo, exp[i]);
 		} else if (isNeg(exp[i])) {
-			if (filo.size() < 1)
-				throw(RPNException());
-			bool val = filo.front();
-			filo.pop_front();
-			filo.push_front(func_neg(val));
+			handleNeg(filo);
 		} else if (!isspace(exp[i])) {
-			op = getop(exp[i]);
-			if (op) {
-				if (filo.size() < 2)
-					throw(RPNException());
-				bool rhs = filo.front();
-				filo.pop_front();
-				bool lhs = filo.front();
-				filo.pop_front();
-				filo.push_front(op(lhs, rhs));
-			} else
-				throw(RPNException());
+			handleOp(filo, exp[i]);
 		}
 	}
 	if (filo.size() != 1)
@@ -52,7 +44,7 @@ opfun getop(char c) {
 		if (c == symbols[i])
 			return (operations[i]);
 	}
-	return (0);
+	return (nullptr);
 }
 
 bool isValue(char c) {
@@ -71,4 +63,31 @@ bool toBool(char c) {
 	if (c == '1')
 		return (true);
 	return (false);
+}
+
+static void handleValue(deque<bool>& filo, char c) {
+	filo.push_front(toBool(c));
+}
+
+static void handleNeg(deque<bool>& filo) {
+	if (filo.size() < 1)
+		throw(RPNException());
+	bool val = filo.front();
+	filo.pop_front();
+	filo.push_front(func_neg(val));
+}
+
+static void handleOp(deque<bool>& filo, char c) {
+	opfun op = nullptr;
+	op = getop(c);
+	if (op != nullptr) {
+		if (filo.size() < 2)
+			throw(RPNException());
+		bool rhs = filo.front();
+		filo.pop_front();
+		bool lhs = filo.front();
+		filo.pop_front();
+		filo.push_front(op(lhs, rhs));
+	} else
+		throw(RPNException());
 }

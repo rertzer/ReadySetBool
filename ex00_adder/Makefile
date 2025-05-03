@@ -1,6 +1,6 @@
 CXX = c++
 
-CXXFLAGS = -Wall -Wextra -Werror -g3
+CXXFLAGS = -Wall -Wextra -Werror -Winline -g3
 
 NAME = adder 
 

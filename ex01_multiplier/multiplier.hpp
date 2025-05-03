@@ -13,11 +13,8 @@
 #ifndef MULTIPLIER_HPP
 #define MULTIPLIER_HPP
 
-#include "adder.hpp"
-#include <iostream>
-
-using namespace std;
+#include <cstdint>
 
 uint32_t multiplier(uint32_t a, uint32_t b);
 
-#endif //! MULTIPLIER_HPP
+#endif	//! MULTIPLIER_HPP

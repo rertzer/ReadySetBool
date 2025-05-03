@@ -15,27 +15,17 @@
 #include <sstream>
 #include "gray_code.hpp"
 
+static uint32_t readNumber(char* str);
+
 using namespace std;
 
-uint32_t readNumber(char* str) {
-	uint32_t	 n;
-	stringstream ss;
-
-	ss.exceptions(ios::failbit);
-
-	ss << str;
-	ss >> n;
-
-	return (n);
-}
-
 int main(int argc, char** argv) {
+	uint32_t a;
+
 	if (argc != 2) {
 		cerr << "adder require a number as arguments\n";
 		return (1);
 	}
-
-	uint32_t a;
 
 	try {
 		a = readNumber(argv[1]);
@@ -49,4 +39,16 @@ int main(int argc, char** argv) {
 	cout << "gray   " << bitset<32>(c) << " (" << c << ")\n";
 
 	return (0);
+}
+
+static uint32_t readNumber(char* str) {
+	uint32_t	 n;
+	stringstream ss;
+
+	ss.exceptions(ios::failbit);
+
+	ss << str;
+	ss >> n;
+
+	return (n);
 }
