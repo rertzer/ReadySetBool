@@ -29,6 +29,7 @@ class Formula {
 
 	void   rewrite();
 	void   erase();
+	void   kill();
 	void   fromString(string& reversePolish);
 	string revertPolish() const;
 	void   nnf();

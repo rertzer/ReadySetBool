@@ -30,7 +30,7 @@ Formula::Formula(char s)
 	  left_child(nullptr),
 	  right_child(nullptr) {}
 
-Formula::Formula(Formula const& f) {
+Formula::Formula(Formula const& f) : left_child(nullptr), right_child(nullptr) {
 	*this = f;
 	if (left_child != nullptr) {
 		left_child = new Formula(*left_child);
@@ -40,7 +40,7 @@ Formula::Formula(Formula const& f) {
 	}
 }
 
-Formula::Formula(Formula&& f) {
+Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
 	*this = f;
 	f.parent = nullptr;
 	f.left_child = nullptr;
@@ -107,7 +107,6 @@ void Formula::rewrite() {
 	SuperStack<Formula*> to_visit;
 	to_visit.push(this);
 	while (!to_visit.empty()) {
-		// cout << "rewrite\n";
 		rewriteNode(to_visit);
 	}
 }
@@ -124,9 +123,8 @@ void Formula::rewriteNode(SuperStack<Formula*>& to_visit) {
 }
 
 Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
-	// cout << "rewrite child\n";
-	// print();
 	Formula* kid = child;
+
 	if (child->kind == Kind::Neg) {
 		if (child->left_child->kind == Kind::Neg) {
 			kid = rewriteDoubleNegation(to_visit, child);
@@ -167,41 +165,41 @@ Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
 
 Formula* Formula::rewriteMorganConj(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child;
+
 	child->kill();
 	kid->op = Op::Dis;
 	kid->left_child = kid->left_child->negate();
 	kid->right_child = kid->right_child->negate();
 	to_visit.push(this);
-	// cout << "rmc\n";
+
 	return (kid);
 }
 
 Formula* Formula::rewriteMorganDis(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child;
+
 	child->kill();
 	kid->op = Op::Conj;
 	kid->left_child = kid->left_child->negate();
 	kid->right_child = kid->right_child->negate();
 	to_visit.push(this);
 
-	// cout << "rmd\n";
 	return (kid);
 }
 
 Formula* Formula::rewriteDoubleNegation(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child->left_child;
+
 	child->left_child->kill();
 	child->kill();
 	to_visit.push(this);
-	// cout << "rdn\n";
+
 	return (kid);
 }
 
 void Formula::rewriteMaterialCondition() {
 	left_child = left_child->negate();
 	op = Op::Dis;
-
-	// cout << "rmc\n";
 }
 
 void Formula::rewriteEquivalence() {
@@ -211,12 +209,13 @@ void Formula::rewriteEquivalence() {
 	left_child = new Formula('>');
 	right_child = new Formula('>');
 
+	cout << "warning" << endl;
 	left_child->left_child = left_kid;
 	left_child->right_child = right_kid;
+	cout << "right kid left child " << right_kid->left_child << endl;
 	right_child->left_child = new Formula(*right_kid);
 	right_child->right_child = new Formula(*left_kid);
 
-	// cout << "req\n";
 	op = Op::Conj;
 }
 
@@ -232,12 +231,10 @@ void Formula::rewriteExclusiveDisjunction() {
 	left_child->left_child = left_kid->negate();
 	left_child->right_child = right_kid->negate();
 
-	// cout << "red\n";
 	op = Op::Conj;
 }
 
 void Formula::rewriteDisjunction(SuperStack<Formula*>& to_visit) {
-	// cout << "rdis\n";
 	if (right_child->op == Op::Conj) {
 		rewriteDisjunctionRight();
 		to_visit.push(this);
@@ -256,7 +253,6 @@ void Formula::rewriteDisjunctionLeft() {
 	left_child->op = Op::Dis;
 	left_child->right_child = new Formula(*right_kid);
 	op = Op::Conj;
-	// cout << "rdisL\n";
 }
 
 void Formula::rewriteDisjunctionRight() {
@@ -268,11 +264,11 @@ void Formula::rewriteDisjunctionRight() {
 	right_child->op = Op::Dis;
 	right_child->left_child = new Formula(*left_kid);
 	op = Op::Conj;
-	// cout << "rdisR\n";
 }
 
 Formula* Formula::negate() {
 	Formula* neg = new Formula('!');
+
 	neg->left_child = this;
 
 	return (neg);
@@ -282,6 +278,7 @@ string Formula::revertPolish() {
 	SuperStack<Formula*> to_visit;
 	string				 rp;
 	string				 ops;
+
 	to_visit.push(this);
 	while (!to_visit.empty()) {
 		revertNode(rp, ops, to_visit);
@@ -307,7 +304,6 @@ void Formula::revertNode(string& rp, string& ops, SuperStack<Formula*>& to_visit
 			current_node->revertVar(rp);
 			break;
 	}
-	// cout << rp << " " << ops << endl;
 }
 
 void Formula::revertRoot(string& rp, string& ops, SuperStack<Formula*>& to_reverse) {
@@ -316,7 +312,6 @@ void Formula::revertRoot(string& rp, string& ops, SuperStack<Formula*>& to_rever
 		to_reverse.push(left_child);
 		visited = Visit::Second;
 	} else {
-		// reverse(rp.begin(), rp.end());
 		if (!ops.empty()) {
 			reverse(ops.begin(), ops.end());
 			rp.append(ops);
@@ -334,12 +329,10 @@ void Formula::revertOp(string& rp, string& ops, SuperStack<Formula*>& to_reverse
 		to_reverse.push(left_child);
 		visited = Visit::Second;
 	} else {
-		// string tmp;
 		while ((!ops.empty()) && (ops.back() != s)) {
 			rp.push_back(ops.back());
 			ops.pop_back();
 		}
-		// rp.insert(0, tmp);
 		visited = Visit::First;
 	}
 }

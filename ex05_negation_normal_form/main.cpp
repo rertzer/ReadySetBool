@@ -1,5 +1,6 @@
 #include <vector>
 #include "Formula.hpp"
+#include "nnf.hpp"
 
 int main() {
 	vector<string> rpolish;
@@ -14,20 +15,14 @@ int main() {
 	rpolish.push_back("");
 	rpolish.push_back("AB^");
 	rpolish.push_back("ABCD&|&");
+
 	for (auto rp : rpolish) {
 		cout << "rpolish: " << rp << endl;
 		try {
-			Formula nnf(rp);
-			nnf.print();
-			string reverted = nnf.revertPolish();
-			cout << reverted << endl;
-			nnf.rewrite();
-			cout << "double neg removed\n";
-			nnf.print();
-			reverted = nnf.revertPolish();
-			cout << reverted << endl << endl;
+			string reverted = negation_normal_form(rp);
+			cout << reverted << "\n\n";
 		} catch (const exception& e) {
-			cerr << e.what() << endl;
+			cerr << e.what() << "\n\n";
 		}
 	}
 }

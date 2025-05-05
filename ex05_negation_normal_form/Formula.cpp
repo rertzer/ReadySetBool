@@ -30,18 +30,26 @@ Formula::Formula(char s)
 	  left_child(nullptr),
 	  right_child(nullptr) {}
 
-Formula::Formula(Formula const& f) {
+Formula::Formula(Formula const& f) : left_child(nullptr), right_child(nullptr) {
 	*this = f;
 }
 
-Formula::Formula(Formula&& f) {
+Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
 	*this = f;
 	f.parent = nullptr;
 	f.left_child = nullptr;
 	f.right_child = nullptr;
 }
 
-Formula::~Formula() {}
+Formula::~Formula() {
+	cout << "left child " << left_child << endl;
+	if (left_child != nullptr) {
+		delete left_child;
+	}
+	if (right_child != nullptr) {
+		delete right_child;
+	}
+}
 
 Formula& Formula::operator=(Formula const& f) {
 	if (this != &f) {
@@ -50,7 +58,13 @@ Formula& Formula::operator=(Formula const& f) {
 		name = f.name;
 		visited = f.visited;
 		parent = f.parent;
+		if (left_child != nullptr) {
+			delete left_child;
+		}
 		left_child = f.left_child;
+		if (right_child != nullptr) {
+			delete right_child;
+		}
 		right_child = f.right_child;
 	}
 	return (*this);
@@ -62,6 +76,12 @@ Formula& Formula::operator=(Formula&& f) {
 	f.left_child = nullptr;
 	f.right_child = nullptr;
 	return (*this);
+}
+
+void Formula::kill() {
+	left_child = nullptr;
+	right_child = nullptr;
+	delete this;
 }
 
 void Formula::erase() {
@@ -131,7 +151,8 @@ Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
 
 Formula* Formula::rewriteMorganConj(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child;
-	child->~Formula();
+
+	child->kill();
 	kid->op = Op::Dis;
 	kid->left_child = kid->left_child->negate();
 	kid->right_child = kid->right_child->negate();
@@ -142,7 +163,7 @@ Formula* Formula::rewriteMorganConj(SuperStack<Formula*>& to_visit, Formula* chi
 
 Formula* Formula::rewriteMorganDis(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child;
-	child->~Formula();
+	child->kill();
 	kid->op = Op::Conj;
 	kid->left_child = kid->left_child->negate();
 	kid->right_child = kid->right_child->negate();
@@ -153,8 +174,8 @@ Formula* Formula::rewriteMorganDis(SuperStack<Formula*>& to_visit, Formula* chil
 
 Formula* Formula::rewriteDoubleNegation(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child->left_child;
-	child->left_child->~Formula();
-	child->~Formula();
+	child->left_child->kill();
+	child->kill();
 	to_visit.push(this);
 
 	return (kid);
@@ -188,13 +209,16 @@ void Formula::rewriteEquivalence(SuperStack<Formula*>& to_visit) {
 void Formula::rewriteExclusiveDisjunction(SuperStack<Formula*>& to_visit) {
 	Formula* left_kid = left_child;
 	Formula* right_kid = right_child;
+	// ?????????????????????????????????????????????????????????????
+	Formula* left_kid_bis = new Formula(*left_child);
+	Formula* right_kid_bis = new Formula(*right_child);
 
 	left_child = new Formula('&');
 	right_child = new Formula('&');
 
 	left_child->left_child = left_kid;
-	left_child->right_child = right_kid->negate();
-	right_child->left_child = left_kid->negate();
+	left_child->right_child = right_kid_bis->negate();
+	right_child->left_child = left_kid_bis->negate();
 	right_child->right_child = right_kid;
 
 	op = Op::Dis;
