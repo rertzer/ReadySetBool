@@ -1,23 +1,6 @@
 #include "print_truth_table.hpp"
 
-uint32_t power(uint32_t x, uint32_t p) {
-	uint32_t result;
-
-	if (p == 0) {
-		result = 1;
-	} else if (p == 1) {
-		result = x;
-	} else {
-		uint32_t tmp = power(x, p / 2);
-		if ((p % 2) == 0) {
-			result = tmp * tmp;
-		} else {
-			result = x * tmp * tmp;
-		}
-	}
-
-	return (result);
-}
+static inline bool is_valued(uint32_t table_entry, size_t alphabet_size, size_t index);
 
 void print_truth_table(string const& formula) {
 	string	 formula_alphabet = get_alphabet(formula);
@@ -51,12 +34,31 @@ string get_alphabet(string const& formula) {
 	return (alphabet);
 }
 
+uint32_t power(uint32_t x, uint32_t p) {
+	uint32_t result;
+
+	if (p == 0) {
+		result = 1;
+	} else if (p == 1) {
+		result = x;
+	} else {
+		uint32_t tmp = power(x, p / 2);
+		if ((p % 2) == 0) {
+			result = tmp * tmp;
+		} else {
+			result = x * tmp * tmp;
+		}
+	}
+
+	return (result);
+}
+
 string value_formula(string const& formula, string const alphabet, uint32_t table_entry) {
 	string valued_formula;
 	char   values[26] = {0};
 
 	for (size_t i = 0; i < alphabet.size(); ++i) {
-		if (((table_entry >> (alphabet.size() - i - 1)) & 0x1) == 1) {
+		if (is_valued(table_entry, alphabet.size(), i)) {
 			values[i] = '1';
 		} else {
 			values[i] = '0';
@@ -76,6 +78,10 @@ string value_formula(string const& formula, string const alphabet, uint32_t tabl
 	return (valued_formula);
 }
 
+static inline bool is_valued(uint32_t table_entry, size_t alphabet_size, size_t index) {
+	return (((table_entry >> (alphabet_size - index - 1)) & 0x1) == 1);
+}
+
 void print_table_header(string const& alphabet) {
 	cout << "|";
 
@@ -90,7 +96,7 @@ void print_table_entry(uint32_t table_entry, uint32_t alphabet_size, bool result
 
 	cout << "|";
 	for (size_t i = 0; i < alphabet_size; ++i) {
-		if (((table_entry >> (alphabet_size - i - 1)) & 0x1) == 1) {
+		if (is_valued(table_entry, alphabet_size, i)) {
 			value = '1';
 		} else {
 			value = '0';

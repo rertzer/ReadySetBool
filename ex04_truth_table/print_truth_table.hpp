@@ -23,15 +23,16 @@
 
 using namespace std;
 
-void   print_truth_table(string const& formula);
-string get_alphabet(string const& formula);
-string value_formula(string const& formula, string const alphabet, uint32_t table_entry);
-void   print_table_header(string const& alphabet);
-void   print_table_entry(uint32_t table_entry, uint32_t alphabet_size, bool result);
+void	 print_truth_table(string const& formula);
+string	 get_alphabet(string const& formula);
+uint32_t power(uint32_t x, uint32_t p);
+string	 value_formula(string const& formula, string const alphabet, uint32_t table_entry);
+void	 print_table_header(string const& alphabet);
+void	 print_table_entry(uint32_t table_entry, uint32_t alphabet_size, bool result);
 
 class PTTException : public std::exception {
    public:
-	virtual const char* what() const throw() { return "Error"; }
+	virtual const char* what() const throw() { return "Error print truth table"; }
 };
 
 #endif
