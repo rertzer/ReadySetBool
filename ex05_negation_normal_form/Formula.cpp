@@ -30,10 +30,22 @@ Formula::Formula(char s)
 	  left_child(nullptr),
 	  right_child(nullptr) {}
 
-Formula::Formula(Formula const& f) : left_child(nullptr), right_child(nullptr) {
-	*this = f;
+// deep copy
+Formula::Formula(Formula const& f)
+	: kind(f.kind), op(f.op), name(f.name), visited(f.visited), parent(f.parent) {
+	if (f.left_child == nullptr) {
+		left_child = nullptr;
+	} else {
+		left_child = new Formula(*f.left_child);
+	}
+	if (f.right_child == nullptr) {
+		right_child = nullptr;
+	} else {
+		right_child = new Formula(*f.right_child);
+	}
 }
 
+// shallow copy
 Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
 	*this = f;
 	f.parent = nullptr;
@@ -41,8 +53,8 @@ Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
 	f.right_child = nullptr;
 }
 
+// deep delete
 Formula::~Formula() {
-	cout << "left child " << left_child << endl;
 	if (left_child != nullptr) {
 		delete left_child;
 	}
@@ -51,6 +63,7 @@ Formula::~Formula() {
 	}
 }
 
+// shallow copy
 Formula& Formula::operator=(Formula const& f) {
 	if (this != &f) {
 		kind = f.kind;
@@ -70,6 +83,7 @@ Formula& Formula::operator=(Formula const& f) {
 	return (*this);
 }
 
+// shallow copy
 Formula& Formula::operator=(Formula&& f) {
 	*this = f;
 	f.parent = nullptr;
@@ -78,6 +92,7 @@ Formula& Formula::operator=(Formula&& f) {
 	return (*this);
 }
 
+// shallow delete
 void Formula::kill() {
 	left_child = nullptr;
 	right_child = nullptr;
@@ -195,11 +210,11 @@ void Formula::rewriteEquivalence(SuperStack<Formula*>& to_visit) {
 
 	left_child = new Formula('>');
 	right_child = new Formula('>');
-
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	left_child->left_child = left_kid;
 	left_child->right_child = right_kid;
-	right_child->left_child = right_kid;
-	right_child->right_child = left_kid;
+	right_child->left_child = new Formula(*right_kid);
+	right_child->right_child = new Formula(*left_kid);
 
 	op = Op::Conj;
 
