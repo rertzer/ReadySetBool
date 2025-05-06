@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 		x = toInt(argv[1]);
 		y = toInt(argv[2]);
 	} catch (const exception& e) {
-		cerr << e.what();
+		cerr << e.what() << endl;
 		return (1);
 	}
 
