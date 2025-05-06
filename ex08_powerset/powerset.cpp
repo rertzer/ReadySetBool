@@ -1,5 +1,4 @@
 #include "powerset.hpp"
-#include "printer.hpp"
 
 uint64_t power(uint64_t x, uint64_t p) {
 	uint64_t result;

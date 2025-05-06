@@ -1,7 +1,7 @@
 #ifndef POWERSET_HPP
 #define POWERSET_HPP
 
-#include <iostream>
+#include <stdint.h>
 #include <vector>
 
 using namespace std;
