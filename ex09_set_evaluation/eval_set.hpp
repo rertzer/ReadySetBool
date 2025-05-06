@@ -32,9 +32,4 @@ bool			eval_number(string const& formula, string const alphabet, uint32_t subset
 string			get_alphabet(string const& formula);
 string			value_formula(string const& formula, string const alphabet, uint32_t subset);
 
-class PTTException : public std::exception {
-   public:
-	virtual const char* what() const throw() { return "Error"; }
-};
-
 #endif

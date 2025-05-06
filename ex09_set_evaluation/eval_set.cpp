@@ -26,8 +26,7 @@ vector<int32_t> eval_set(string const& formula, vector<vector<int32_t>> sets) {
 	for (auto number : union_set) {
 		uint32_t subset = get_subset(sets, number);
 		string	 valued_formula = value_formula(formula, alphabet, subset);
-		bool	 ok = eval_formula(valued_formula);
-		if (ok == true) {
+		if (eval_formula(valued_formula) == true) {
 			soluce.push_back(number);
 		}
 	}
@@ -54,6 +53,7 @@ string get_alphabet(string const& formula) {
 
 set<int32_t> get_union_set(vector<vector<int32_t>> const& sets) {
 	set<int32_t> union_set;
+
 	for (auto set : sets) {
 		for (auto item : set) {
 			union_set.insert(item);
@@ -64,10 +64,11 @@ set<int32_t> get_union_set(vector<vector<int32_t>> const& sets) {
 
 uint32_t get_subset(vector<vector<int32_t>> sets, int32_t number) {
 	uint32_t subset = 0;
+
 	for (size_t i = 0; i < sets.size(); ++i) {
 		auto it = find(sets[i].begin(), sets[i].end(), number);
 		if (it != sets[i].end()) {
-			subset |= 1 << i;
+			subset |= 1 << (sets.size() - i - 1);
 		}
 	}
 	return (subset);

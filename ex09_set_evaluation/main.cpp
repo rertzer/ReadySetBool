@@ -15,15 +15,31 @@
 
 int main() {
 	vector<string> formulas = {
-		"AB&", "AB|", "A!"	//, "AB>", "AB=", "ABCD||=", "AB|C&", "ABC|&", "ABCDEFG||||||",
-							//"ABCDEFGHIJKLMNOPQRSTUVWXYZ|||||||||||||||||||||||||"
+		"AB&", "AB|", "A!", "AB>", "AB=", "ABCD||=", "AB|C&", "ABC|&", "A!BCD!EFG||||||",
 	};
-	vector<vector<vector<int32_t>>> sets = {
-		{{0, 1, 2}, {0, 3, 4}}, {{0, 1, 2}, {3, 4, 5}}, {{0, 1, 2}}};
+	vector<vector<vector<int32_t>>> sets = {{{0, 1, 2}, {0, 3, 4}},
+											{{0, 1, 2}, {3, 4, 5}},
+											{{0, 1, 2}},
+											{{0, 1, 2}, {0, 3, 4}},
+											{{0, 1, 2}, {0, 3, 4}},
+											{{0, 1, 9}, {2, 4, 9}, {0, 1, 3}, {2, 4, 6}},
+											{{0, 1, 4, 7, 9}, {1}, {2, 3, 7}},
+											{{0, 1, 4, 7, 9}, {1}, {2, 3, 7}},
+											{{0, 1, 2, 13},
+											 {0, 3, 5, 17},
+											 {0, 4, 42, 5},
+											 {13, 17, 42},
+											 {0, 2, 4, 6},
+											 {10, 42},
+											 {1, 2, 3}}};
 
 	for (size_t i = 0; i < formulas.size(); ++i) {
-		vector<int32_t> soluce = eval_set(formulas[i], sets[i]);
-		cout << formulas[i] << "\t" << soluce << "\n";
+		try {
+			vector<int32_t> soluce = eval_set(formulas[i], sets[i]);
+			cout << formulas[i] << "\t" << soluce << "\n";
+		} catch (FormulaException& e) {
+			cout << "Formula exception: " << e.what() << "\n";
+		}
 	}
 	return (0);
 }

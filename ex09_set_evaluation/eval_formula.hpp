@@ -40,7 +40,7 @@ bool func_equal(bool a, bool b);
 
 class FormulaException : public std::exception {
    public:
-	virtual const char* what() const throw() { return "EvalFormula: invalid formula"; }
+	virtual const char* what() const throw() { return "invalid formula"; }
 };
 
 #endif
