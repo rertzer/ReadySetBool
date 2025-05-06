@@ -3,6 +3,7 @@
 string conjunctive_normal_form(string const& rp) {
 	Formula cnf(rp);
 	cnf.cnf();
+	// cnf.print();
 	string cnf_rp = cnf.revertPolish();
 	return (cnf_rp);
 }

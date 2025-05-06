@@ -209,10 +209,8 @@ void Formula::rewriteEquivalence() {
 	left_child = new Formula('>');
 	right_child = new Formula('>');
 
-	cout << "warning" << endl;
 	left_child->left_child = left_kid;
 	left_child->right_child = right_kid;
-	cout << "right kid left child " << right_kid->left_child << endl;
 	right_child->left_child = new Formula(*right_kid);
 	right_child->right_child = new Formula(*left_kid);
 
