@@ -15,10 +15,11 @@
 int main() {
 	vector<string> formulas = {
 
-		"AB&",	   "AB|",	  "AB>",	"BA^",	  "BA^AB^=",	   "BA^AA^=", "AB=",
-		"ABAA||=", "AB|A&",	  "A!B|A&", "BB!|A&", "ABA|&",		   "ABA|&!",  "AAA",
-		"|A=",	   "A23",	  "A+A=B",	"A",	  "AX|",		   "AA!&",	  "AA^",
-		"AB>",	   "ABCD||=", "AB|C&",	"ABC|&",  "ABCDEFG||||||",
+		"AB&",	 "AB|",	   "AB>",		"BA^",		 "BA^AB^=", "BA^AA^=",		 "AB=", "ABAA||=",
+		"AB|A&", "A!B|A&", "BB!|A&",	"ABA|&",	 "ABA|&!",	"AAA",			 "|A=", "A23",
+		"A+A=B", "A",	   "A!",		"AA|",		 "AA&",		"AA!&",			 "AA^", "AA>",
+		"AA!>",	 "ABC||",  "AB&A!B!&&", "ABCDE&&&&", "AAA^^",	"ABCDE^^^^",	 "AX|", "AA!&",
+		"AA^",	 "AB>",	   "ABCD||=",	"AB|C&",	 "ABC|&",	"ABCDEFG||||||",
 		//"ABCDEFGHIJKLMNOPQRSTUVWXYZ|||||||||||||||||||||||||"};
 
 	};

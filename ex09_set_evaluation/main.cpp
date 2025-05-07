@@ -15,9 +15,30 @@
 
 int main() {
 	vector<string> formulas = {
-		"AB&", "AB|", "A!", "AB>", "AB=", "ABCD||=", "AB|C&", "ABC|&", "A!BCD!EFG||||||",
+		"A",   "A!",  "A",	 "A!",	  "A!B&",  "AB|",	  "AB&",   "AB&",	"AB&",
+		"AB^", "AB>", "AB>", "ABC||", "ABC||", "ABC&&",	  "ABC&&", "ABC^^", "ABC>>",
+		"AB&", "AB|", "A!",	 "AB>",	  "AB=",   "ABCD||=", "AB|C&", "ABC|&", "A!BCD!EFG||||||",
 	};
-	vector<vector<vector<int32_t>>> sets = {{{0, 1, 2}, {0, 3, 4}},
+	vector<vector<vector<int32_t>>> sets = {{{}},
+											{{}},
+											{{42}},
+											{{42}},
+											{{1, 2, 3}, {2, 3, 4}},
+											{{0, 1, 2}, {}},
+											{{0, 1, 2}, {}},
+											{{0, 1, 2}, {0}},
+											{{0, 1, 2}, {42}},
+											{{0, 1, 2}, {0}},
+											{{0}, {1, 2}},
+											{{0}, {0, 1, 2}},
+											{{}, {}, {}},
+											{{0}, {1}, {2}},
+											{{0}, {0}, {0}},
+											{{0}, {0}, {}},
+											{{0}, {0}, {0}},
+											{{0}, {0}, {0}},
+											{{0}, {0}, {0}},
+											{{0, 1, 2}, {0, 3, 4}},
 											{{0, 1, 2}, {3, 4, 5}},
 											{{0, 1, 2}},
 											{{0, 1, 2}, {0, 3, 4}},
@@ -36,7 +57,7 @@ int main() {
 	for (size_t i = 0; i < formulas.size(); ++i) {
 		try {
 			vector<int32_t> soluce = eval_set(formulas[i], sets[i]);
-			cout << formulas[i] << "\t" << soluce << "\n";
+			cout << formulas[i] << " with\t" << sets[i] << " gives\t" << soluce << "\n";
 		} catch (FormulaException& e) {
 			cout << "Formula exception: " << e.what() << "\n";
 		}

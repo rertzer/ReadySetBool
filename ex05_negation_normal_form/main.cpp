@@ -1,12 +1,22 @@
 #include <vector>
-#include "Formula.hpp"
 #include "nnf.hpp"
 
 int main() {
 	vector<string> rpolish;
-	rpolish.push_back("AB|C&!");
-	rpolish.push_back("AB|!");
+	rpolish.push_back("A");
+	rpolish.push_back("A!");
 	rpolish.push_back("AB&!");
+	rpolish.push_back("AB|!");
+	rpolish.push_back("AB>!");
+	rpolish.push_back("AB=!");
+	rpolish.push_back("ABC||");
+	rpolish.push_back("ABC||!");
+	rpolish.push_back("ABC|&");
+	rpolish.push_back("ABC&|");
+	rpolish.push_back("ABC&|!");
+	rpolish.push_back("ABC^^");
+	rpolish.push_back("ABC>>");
+	rpolish.push_back("AB|C&!");
 	rpolish.push_back("FG=");
 	rpolish.push_back("AB=!!");
 	rpolish.push_back("A!!!!B!!!^");

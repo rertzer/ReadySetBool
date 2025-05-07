@@ -14,20 +14,29 @@
 
 int main() {
 	vector<string> formulas = {"AB&",
+							   "A",
+							   "A!",
+							   "zut",
 							   "AB|",
 							   "AB>",
 							   "AB=",
+							   "AA=",
 							   "AB^",
+							   "ABC==",
+							   "AB>C>",
+							   "AB>A>A>",
 							   "ABCD||=",
 							   "ABCD||=!",
 							   "AB|C&",
 							   "ABC|&",
 							   "A!B!C!D!EFG||||||",
 							   "DE^AD|&B^EE!|&F=",
-							   "ABCDEFGHIJKLMNOPQRSTUVWXYZ|||||||||||||||||||||||||"};
+							   "ABC^^",
+							   "ABC!&B!C&|!&A!BC!&B!C&|&|",
+							   /*"ABCDEFGHIJKLMNOPQRSTUVWXYZ|||||||||||||||||||||||||"*/};
 
 	for (auto form : formulas) {
-		cout << form << "\n";
+		cout << form << "\n\n";
 		try {
 			print_truth_table(form);
 		} catch (PTTException& e) {
@@ -35,7 +44,7 @@ int main() {
 		} catch (RPNException& e) {
 			cout << "Oops! " << e.what();
 		}
-		cout << "\n";
+		cout << "\n\n\n";
 	}
 	return (0);
 }

@@ -89,6 +89,12 @@ void print_table_header(string const& alphabet) {
 		cout << " " << letter << " |";
 	}
 	cout << " = |\n";
+
+	cout << "|";
+	for (size_t i = 0; i < alphabet.size(); ++i) {
+		cout << "---|";
+	}
+	cout << "---|\n";
 }
 
 void print_table_entry(uint32_t table_entry, uint32_t alphabet_size, bool result) {
