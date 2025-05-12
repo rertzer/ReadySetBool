@@ -10,50 +10,46 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "multiplier.hpp"
-#include <sstream>
 #include <bitset>
+#include <iostream>
+#include <sstream>
+#include "multiplier.hpp"
 
-uint32_t	readNumber(char *str)
-{
-	uint32_t		n;
-	stringstream	ss;
+using namespace std;
+
+uint32_t readNumber(char* str) {
+	uint32_t	 n;
+	stringstream ss;
 
 	ss.exceptions(ios::failbit);
-	
+
 	ss << str;
 	ss >> n;
 
 	return (n);
 }
 
-int	main(int argc, char **argv)
-{
-
-	if (argc != 3)
-	{
+int main(int argc, char** argv) {
+	if (argc != 3) {
 		cerr << "multiplier require two numbers as arguments\n";
 		return (1);
 	}
-	
-	uint32_t	a;
-	uint32_t	b;
 
-	try
-	{
+	uint32_t a;
+	uint32_t b;
+
+	try {
 		a = readNumber(argv[1]);
 		b = readNumber(argv[2]);
-	}
-	catch (const exception& e)
-	{
+	} catch (const exception& e) {
 		cerr << "bad argument\n";
 		return (1);
 	}
-	
-	uint32_t	c = multiplier(a, b);
+
+	uint32_t c = multiplier(a, b);
 
 	cout << "   " << bitset<32>(a) << " (" << a << ")\n";
-	cout << " * " << bitset<32>(b) << " (" << b  << ")\n";
+	cout << " * " << bitset<32>(b) << " (" << b << ")\n";
 	cout << "__________________________________\n";
 	cout << "   " << bitset<32>(c) << " (" << c << ")\n";
 
