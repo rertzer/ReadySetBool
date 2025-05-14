@@ -3,6 +3,8 @@
 
 int main() {
 	vector<string> rpolish;
+	rpolish.push_back("||");
+	rpolish.push_back("F>ABC&|");
 	rpolish.push_back("A");
 	rpolish.push_back("A!");
 	rpolish.push_back("AB&!");

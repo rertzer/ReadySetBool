@@ -37,7 +37,6 @@ class Formula {
 	char   getSymbol() const;
 	char   getOpSymbol() const;
 
-   private:
 	class InternalException : public exception {
 	   public:
 		virtual const char* what() const throw() { return ("Formula error: internal error"); }
@@ -49,6 +48,7 @@ class Formula {
 		}
 	};
 
+   private:
 	Formula* addOp(string& rp);
 	Formula* addNeg(string& rp);
 	Formula* addVar(string& rp);
