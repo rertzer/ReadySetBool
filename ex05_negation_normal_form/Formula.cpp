@@ -8,9 +8,7 @@ Formula::Formula()
 	  visited(Visit::First),
 	  parent(nullptr),
 	  left_child(nullptr),
-	  right_child(nullptr) {
-	cout << "formula 1\n";
-}
+	  right_child(nullptr) {}
 
 Formula::Formula(string rp)
 	: kind(Kind::Root),
@@ -20,7 +18,6 @@ Formula::Formula(string rp)
 	  parent(nullptr),
 	  left_child(nullptr),
 	  right_child(nullptr) {
-	cout << "formula 2\n";
 	fromString(rp);
 }
 
@@ -31,14 +28,11 @@ Formula::Formula(char s)
 	  visited(Visit::First),
 	  parent(nullptr),
 	  left_child(nullptr),
-	  right_child(nullptr) {
-	cout << "formula3\n";
-}
+	  right_child(nullptr) {}
 
 // deep copy
 Formula::Formula(Formula const& f)
 	: kind(f.kind), op(f.op), name(f.name), visited(f.visited), parent(f.parent) {
-	cout << "formula4\n";
 	if (f.left_child == nullptr) {
 		left_child = nullptr;
 	} else {
@@ -57,7 +51,6 @@ Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
 	f.parent = nullptr;
 	f.left_child = nullptr;
 	f.right_child = nullptr;
-	cout << "formula5\n";
 }
 
 // deep delete
@@ -68,8 +61,6 @@ Formula::~Formula() {
 	if (right_child != nullptr) {
 		delete right_child;
 	}
-
-	cout << "delete\n";
 }
 
 // shallow copy
@@ -89,7 +80,6 @@ Formula& Formula::operator=(Formula const& f) {
 		}
 		right_child = f.right_child;
 	}
-	cout << "equals\n";
 	return (*this);
 }
 
@@ -99,7 +89,6 @@ Formula& Formula::operator=(Formula&& f) {
 	f.parent = nullptr;
 	f.left_child = nullptr;
 	f.right_child = nullptr;
-	cout << "equald\n";
 	return (*this);
 }
 
@@ -107,7 +96,6 @@ Formula& Formula::operator=(Formula&& f) {
 void Formula::kill() {
 	left_child = nullptr;
 	right_child = nullptr;
-	cout << "killll\n";
 	delete this;
 }
 
@@ -118,7 +106,6 @@ void Formula::erase() {
 	if (right_child != nullptr) {
 		right_child->erase();
 	}
-	cout << "erase\n";
 	if (kind != Kind::Root)
 		this->~Formula();
 }
