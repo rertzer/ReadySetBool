@@ -3,7 +3,7 @@
 
 int main() {
 	vector<pair<string, string>> rpolish;
-	// rpolish.push_back(make_pair("AB=!", "A"));
+	rpolish.push_back(make_pair("AB=!CE&DF!|=^", "??"));
 	rpolish.push_back(make_pair("A!", "A!"));
 	rpolish.push_back(make_pair("AB&!", "A!B!|"));
 	rpolish.push_back(make_pair("AB|!", "A!B!&"));

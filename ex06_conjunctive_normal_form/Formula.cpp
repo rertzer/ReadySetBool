@@ -54,6 +54,7 @@ Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
 }
 
 Formula::~Formula() {
+	addToTrash(this);
 	if (left_child != nullptr) {
 		delete left_child;
 	}
@@ -120,10 +121,8 @@ void Formula::rewrite() {
 void Formula::rewriteNode(SuperStack<Formula*>& to_visit) {
 	Formula* current_node = to_visit.popout();
 
-	if (current_node->kind == Kind::Root) {
-		while (!to_visit.empty()) {
-			to_visit.pop();
-		}
+	if (isTrash(current_node)) {
+		return;
 	}
 	if (current_node->left_child != nullptr) {
 		current_node->left_child = rewriteChild(to_visit, current_node->left_child);
@@ -368,7 +367,6 @@ void Formula::revertNeg(string& rp, string& ops, SuperStack<Formula*>& to_revers
 		visited = Visit::First;
 	}
 }
-
 void Formula::revertVar(string& rp) {
 	char s = getSymbol();
 	rp.push_back(s);
@@ -635,3 +633,18 @@ void Formula::printSymbol() {
 			break;
 	}
 }
+
+void Formula::addToTrash(Formula* f) {
+	trash.insert(f);
+}
+
+bool Formula::isTrash(Formula* f) {
+	bool					found = false;
+	set<Formula*>::iterator it = trash.find(f);
+	if (it != trash.end()) {
+		found = true;
+	}
+	return (found);
+}
+
+set<Formula*> Formula::trash;
