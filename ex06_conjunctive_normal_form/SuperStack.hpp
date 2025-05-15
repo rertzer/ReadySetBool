@@ -16,7 +16,6 @@ class SuperStack : public std::stack<T> {
 
 	T popout();
 
-   private:
 	class SuperStackEmptyException : public std::exception {
 	   public:
 		virtual const char* what() const throw() {

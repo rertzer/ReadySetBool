@@ -77,7 +77,7 @@ class Formula {
 	void	 revertNode(string& rp, string& ops, SuperStack<Formula*>& to_reverse);
 	void	 revertRoot(string& rp, string& ops, SuperStack<Formula*>& to_reverse);
 	void	 revertOp(string& rp, string& ops, SuperStack<Formula*>& to_reverse);
-	void	 revertNeg(string& rp, SuperStack<Formula*>& to_reverse);
+	void	 revertNeg(string& rp, string& ops, SuperStack<Formula*>& to_reverse);
 	void	 revertVar(string& rp);
 	void	 printNode(SuperStack<Formula*>& to_visit);
 	void	 printRoot(SuperStack<Formula*>& to_visit);

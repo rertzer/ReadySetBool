@@ -3,7 +3,7 @@
 
 int main() {
 	vector<pair<string, string>> rpolish;
-	rpolish.push_back(make_pair("A", "A"));
+	// rpolish.push_back(make_pair("AB=!", "A"));
 	rpolish.push_back(make_pair("A!", "A!"));
 	rpolish.push_back(make_pair("AB&!", "A!B!|"));
 	rpolish.push_back(make_pair("AB|!", "A!B!&"));
@@ -11,9 +11,9 @@ int main() {
 	rpolish.push_back(make_pair("AB=!", "AB|B!B|AA!|B!A!|&&&"));
 	rpolish.push_back(make_pair("ABC||", "ABC||"));
 	rpolish.push_back(make_pair("ABC||!", "A!B!C!&&"));
-	rpolish.push_back(make_pair("ABC|&", "AB|AC|&"));
-	rpolish.push_back(make_pair("ABC&|", "ABC&|"));
-	rpolish.push_back(make_pair("ABC&|!", "A!B!C!&&"));
+	rpolish.push_back(make_pair("ABC&|", "AB|AC|&"));
+	rpolish.push_back(make_pair("ABC|&", "ABC|&"));
+	rpolish.push_back(make_pair("ABC&|!", "A!B!C!|&"));
 	rpolish.push_back(make_pair("ABC^^", "A!BB!||A!CB!||A!BC!||A!CC!||AB!C!||ABC||&&&&&"));
 	rpolish.push_back(make_pair("ABC>>", "A!B!C||"));
 	rpolish.push_back(make_pair("AB|!", "A!B!&"));
