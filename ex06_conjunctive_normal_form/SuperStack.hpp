@@ -2,7 +2,6 @@
 #define SUPERSTACK_HPP
 
 #include <exception>
-#include <set>
 #include <stack>
 
 template <typename T>
@@ -15,9 +14,7 @@ class SuperStack : public std::stack<T> {
 	SuperStack<T>& operator=(SuperStack<T> const& st);
 	SuperStack<T>& operator=(SuperStack<T>&& st);
 
-	T	 popout();
-	void addToTrash(T);
-	bool isTrash(T);
+	T popout();
 
 	class SuperStackEmptyException : public std::exception {
 	   public:
@@ -25,9 +22,6 @@ class SuperStack : public std::stack<T> {
 			return ("SuperStack:exception: stack is empty");
 		}
 	};
-
-   private:
-	std::set<T> trash;
 };
 
 template <typename T>
@@ -66,18 +60,4 @@ T SuperStack<T>::popout() {
 	return (top_element);
 }
 
-template <typename T>
-void SuperStack<T>::addToTrash(T t) {
-	trash.insert(t);
-}
-
-template <typename T>
-bool SuperStack<T>::isTrash(T t) {
-	bool						   found = false;
-	typename std::set<T>::iterator it = trash.find(t);
-	if (it != trash.end()) {
-		found = true;
-	}
-	return (found);
-}
 #endif
