@@ -1,7 +1,7 @@
-#ifndef NNF_HPP
-#include "Formula.hpp"
+#ifndef CNF_HPP
+#define CNF_HPP
 
-string negation_normal_form(string const& rp);
+#include <string>
 
-#define NNF_HPP
+std::string negation_normal_form(std::string const& rp);
 #endif

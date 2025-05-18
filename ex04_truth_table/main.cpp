@@ -32,7 +32,12 @@ int main() {
 							   "A!B!C!D!EFG||||||",
 							   "DE^AD|&B^EE!|&F=",
 							   "ABC^^",
+							   "A!BC&B!C!AB!C!|BC|&|&||&",
 							   "ABC!&B!C&|!&A!BC!&B!C&|&|",
+							   "A!BB!||A!CB!||A!BC!||A!CC!||AB!C!||ABC||&&&&&",
+							   "ABC^^",
+							   "A!BC&B!C!&||AB!C!|BC|&|&",
+
 							   /*"ABCDEFGHIJKLMNOPQRSTUVWXYZ|||||||||||||||||||||||||"*/};
 
 	for (auto form : formulas) {

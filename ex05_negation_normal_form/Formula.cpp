@@ -1,4 +1,5 @@
 #include "Formula.hpp"
+#include <memory>
 #include "SuperStack.hpp"
 
 Formula::Formula()
@@ -6,97 +7,91 @@ Formula::Formula()
 	  op(Op::Na),
 	  name('\0'),
 	  visited(Visit::First),
-	  parent(nullptr),
 	  left_child(nullptr),
 	  right_child(nullptr) {}
-
-Formula::Formula(string rp)
-	: kind(Kind::Root),
-	  op(Op::Na),
-	  name('\0'),
-	  visited(Visit::First),
-	  parent(nullptr),
-	  left_child(nullptr),
-	  right_child(nullptr) {
-	fromString(rp);
-}
 
 Formula::Formula(char s)
 	: kind(charToKind(s)),
 	  op(charToOp(s)),
 	  name(charToName(s)),
 	  visited(Visit::First),
-	  parent(nullptr),
 	  left_child(nullptr),
 	  right_child(nullptr) {}
 
-// deep copy
+Formula::Formula(shared_ptr<Formula> f)
+	: kind(f->kind),
+	  op(f->op),
+	  name(f->name),
+	  visited(f->visited),
+	  left_child(nullptr),
+	  right_child(nullptr) {
+	if (f->left_child != nullptr) {
+		left_child = make_shared<Formula>(f->left_child);
+	}
+	if (f->right_child != nullptr) {
+		right_child = make_shared<Formula>(f->right_child);
+	}
+}
+
 Formula::Formula(Formula const& f)
-	: kind(f.kind), op(f.op), name(f.name), visited(f.visited), parent(f.parent) {
-	if (f.left_child == nullptr) {
-		left_child = nullptr;
-	} else {
-		left_child = new Formula(*f.left_child);
+	: kind(f.kind),
+	  op(f.op),
+	  name(f.name),
+	  visited(f.visited),
+	  left_child(nullptr),
+	  right_child(nullptr) {
+	if (f.left_child != nullptr) {
+		left_child = make_shared<Formula>(f.left_child);
 	}
-	if (f.right_child == nullptr) {
-		right_child = nullptr;
-	} else {
-		right_child = new Formula(*f.right_child);
+	if (f.right_child != nullptr) {
+		right_child = make_shared<Formula>(f.right_child);
 	}
 }
 
-// shallow copy
 Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
-	*this = f;
-	f.parent = nullptr;
-	f.left_child = nullptr;
-	f.right_child = nullptr;
+	*shared_from_this() = f;
+	f.left_child.reset();
+	f.right_child.reset();
 }
 
-// deep delete
 Formula::~Formula() {
 	if (left_child != nullptr) {
-		delete left_child;
+		left_child.reset();
 	}
 	if (right_child != nullptr) {
-		delete right_child;
+		right_child.reset();
 	}
 }
 
-// shallow copy
 Formula& Formula::operator=(Formula const& f) {
-	if (this != &f) {
+	if (shared_from_this().get() != &f) {
 		kind = f.kind;
 		op = f.op;
 		name = f.name;
 		visited = f.visited;
-		parent = f.parent;
 		if (left_child != nullptr) {
-			delete left_child;
+			left_child.reset();
 		}
 		left_child = f.left_child;
 		if (right_child != nullptr) {
-			delete right_child;
+			right_child.reset();
 		}
 		right_child = f.right_child;
 	}
-	return (*this);
+	return (*shared_from_this());
 }
 
-// shallow copy
 Formula& Formula::operator=(Formula&& f) {
-	*this = f;
-	f.parent = nullptr;
-	f.left_child = nullptr;
-	f.right_child = nullptr;
-	return (*this);
+	*shared_from_this() = f;
+	f.left_child.reset();
+	f.right_child.reset();
+	return (*shared_from_this());
 }
 
-// shallow delete
 void Formula::kill() {
-	left_child = nullptr;
-	right_child = nullptr;
-	delete this;
+	left_child.reset();
+	right_child.reset();
+	shared_from_this().reset();
 }
 
 void Formula::erase() {
@@ -107,42 +102,52 @@ void Formula::erase() {
 		right_child->erase();
 	}
 	if (kind != Kind::Root)
-		this->~Formula();
+		shared_from_this()->~Formula();
+}
+void Formula::cnf() {
+	rewrite();
 }
 
 void Formula::rewrite() {
-	SuperStack<Formula*> to_visit;
-	to_visit.push(this);
+	SuperStack<weak_ptr<Formula>> to_visit;
+	to_visit.push(shared_from_this());
 	while (!to_visit.empty()) {
 		rewriteNode(to_visit);
+		cout << revertPolish() << endl;
+		print();
 	}
 }
 
-void Formula::rewriteNode(SuperStack<Formula*>& to_visit) {
-	try {
-		Formula* current_node = to_visit.popout();
+void Formula::rewriteNode(SuperStack<weak_ptr<Formula>>& to_visit) {
+	weak_ptr<Formula> weak_node = to_visit.popout();
 
-		if (current_node->left_child != nullptr) {
-			current_node->left_child = rewriteChild(to_visit, current_node->left_child);
-		}
-		if (current_node->right_child != nullptr) {
-			current_node->right_child = rewriteChild(to_visit, current_node->right_child);
-		}
-	} catch (SuperStack<Formula*>::SuperStackEmptyException& e) {
-		this->~Formula();
-		cout << e.what() << "\n";
-		throw(InvalidStringException());
+	if (weak_node.expired()) {
+		return;
+	}
+
+	shared_ptr<Formula> current_node = weak_node.lock();
+
+	if (current_node->left_child != nullptr) {
+		current_node->left_child = rewriteChild(to_visit, current_node->left_child);
+	}
+	if (current_node->right_child != nullptr) {
+		current_node->right_child = rewriteChild(to_visit, current_node->right_child);
 	}
 }
 
-Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
-	Formula* kid = child;
+shared_ptr<Formula> Formula::rewriteChild(SuperStack<weak_ptr<Formula>>& to_visit,
+										  shared_ptr<Formula>			 child) {
+	shared_ptr<Formula> kid = child;
+
 	if (child->kind == Kind::Neg) {
 		if (child->left_child->kind == Kind::Neg) {
 			kid = rewriteDoubleNegation(to_visit, child);
+			cout << "RDN\n";
 		} else if (child->left_child->op == Op::Conj) {
+			cout << "RMC\n";
 			kid = rewriteMorganConj(to_visit, child);
 		} else if (child->left_child->op == Op::Dis) {
+			cout << "RMD\n";
 			kid = rewriteMorganDis(to_visit, child);
 		} else {
 			to_visit.push(child);
@@ -151,15 +156,23 @@ Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
 	} else if (child->kind == Kind::Op) {
 		switch (child->op) {
 			case Op::Mcond:
-				child->rewriteMaterialCondition(to_visit);
+
+				cout << "material\n";
+				child->rewriteMaterialCondition();
+				to_visit.push(shared_from_this());
 				break;
 			case Op::Leq:
-				child->rewriteEquivalence(to_visit);
+				cout << "Equivalence\n";
+				child->rewriteEquivalence();
+				to_visit.push(shared_from_this());
 				break;
 			case Op::Edis:
-				child->rewriteExclusiveDisjunction(to_visit);
+				child->rewriteExclusiveDisjunction();
+				cout << "Exclusive\n";
+				to_visit.push(shared_from_this());
 				break;
 			default:
+				cout << "Default\n";
 				to_visit.push(child);
 				break;
 		}
@@ -170,144 +183,141 @@ Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
 	return (kid);
 }
 
-Formula* Formula::rewriteMorganConj(SuperStack<Formula*>& to_visit, Formula* child) {
-	Formula* kid = child->left_child;
+shared_ptr<Formula> Formula::rewriteMorganConj(SuperStack<weak_ptr<Formula>>& to_visit,
+											   shared_ptr<Formula>			  child) {
+	shared_ptr<Formula> kid = child->left_child;
 
 	child->kill();
 	kid->op = Op::Dis;
 	kid->left_child = kid->left_child->negate();
 	kid->right_child = kid->right_child->negate();
-	to_visit.push(this);
+	to_visit.push(shared_from_this());
 
 	return (kid);
 }
 
-Formula* Formula::rewriteMorganDis(SuperStack<Formula*>& to_visit, Formula* child) {
-	Formula* kid = child->left_child;
+shared_ptr<Formula> Formula::rewriteMorganDis(SuperStack<weak_ptr<Formula>>& to_visit,
+											  shared_ptr<Formula>			 child) {
+	shared_ptr<Formula> kid = child->left_child;
+
 	child->kill();
 	kid->op = Op::Conj;
 	kid->left_child = kid->left_child->negate();
 	kid->right_child = kid->right_child->negate();
-	to_visit.push(this);
+	to_visit.push(shared_from_this());
 
 	return (kid);
 }
 
-Formula* Formula::rewriteDoubleNegation(SuperStack<Formula*>& to_visit, Formula* child) {
-	Formula* kid = child->left_child->left_child;
+shared_ptr<Formula> Formula::rewriteDoubleNegation(SuperStack<weak_ptr<Formula>>& to_visit,
+												   shared_ptr<Formula>			  child) {
+	shared_ptr<Formula> kid = child->left_child->left_child;
+
 	child->left_child->kill();
 	child->kill();
-	to_visit.push(this);
+	to_visit.push(shared_from_this());
 
 	return (kid);
 }
 
-void Formula::rewriteMaterialCondition(SuperStack<Formula*>& to_visit) {
-	Formula* kid = left_child;
-	left_child = new Formula('!');
-	left_child->left_child = kid;
+void Formula::rewriteMaterialCondition() {
+	left_child = left_child->negate();
 	op = Op::Dis;
-	to_visit.push(this);
 }
 
-void Formula::rewriteEquivalence(SuperStack<Formula*>& to_visit) {
-	Formula* left_kid = left_child;
-	Formula* right_kid = right_child;
+void Formula::rewriteEquivalence() {
+	shared_ptr<Formula> left_kid = left_child;
+	shared_ptr<Formula> right_kid = right_child;
 
-	left_child = new Formula('>');
-	right_child = new Formula('>');
+	left_child = make_shared<Formula>('>');
+	right_child = make_shared<Formula>('>');
 
 	left_child->left_child = left_kid;
 	left_child->right_child = right_kid;
-
-	right_child->left_child = new Formula(*right_kid);
-	right_child->right_child = new Formula(*left_kid);
+	right_child->left_child = make_shared<Formula>(right_kid);
+	right_child->right_child = make_shared<Formula>(left_kid);
 
 	op = Op::Conj;
-
-	to_visit.push(this);
 }
 
-void Formula::rewriteExclusiveDisjunction(SuperStack<Formula*>& to_visit) {
-	Formula* left_kid = left_child;
-	Formula* right_kid = right_child;
+void Formula::rewriteExclusiveDisjunction() {
+	shared_ptr<Formula> left_kid = left_child;
+	shared_ptr<Formula> right_kid = right_child;
 
-	Formula* left_kid_bis = new Formula(*left_child);
-	Formula* right_kid_bis = new Formula(*right_child);
+	left_child = make_shared<Formula>('|');
+	right_child = make_shared<Formula>('|');
 
-	left_child = new Formula('&');
-	right_child = new Formula('&');
+	right_child->right_child = make_shared<Formula>(right_kid);
+	right_child->left_child = make_shared<Formula>(left_kid);
+	left_child->left_child = left_kid->negate();
+	left_child->right_child = right_kid->negate();
 
-	left_child->left_child = left_kid;
-	left_child->right_child = right_kid_bis->negate();
-	right_child->left_child = left_kid_bis->negate();
-	right_child->right_child = right_kid;
-
-	op = Op::Dis;
-
-	to_visit.push(this);
+	op = Op::Conj;
 }
 
-Formula* Formula::negate() {
-	Formula* neg = new Formula('!');
-	neg->left_child = this;
+shared_ptr<Formula> Formula::negate() {
+	shared_ptr<Formula> neg = make_shared<Formula>('!');
+
+	neg->left_child = shared_from_this();
 
 	return (neg);
 }
+/////////////////////////////////////////////////////////////////////////
+string Formula::revertPolish() {
+	string rp;
 
-string Formula::revertPolish() const {
-	SuperStack<Formula const*> to_visit;
-	string					   rp;
-	to_visit.push(this);
-	while (!to_visit.empty()) {
-		revertNode(rp, to_visit);
-	}
-	reverse(rp.begin(), rp.end());
+	revertNode(rp);
 
 	return (rp);
 }
 
-void Formula::revertNode(string& rp, SuperStack<Formula const*>& to_visit) const {
-	Formula const* current_node = to_visit.popout();
-
-	switch (current_node->kind) {
+void Formula::revertNode(string& rp) {
+	switch (shared_from_this()->kind) {
 		case Kind::Root:
-			current_node->revertRoot(to_visit);
+			shared_from_this()->revertRoot(rp);
 			break;
 		case Kind::Op:
-			current_node->revertOp(rp, to_visit);
+			shared_from_this()->revertOp(rp);
 			break;
 		case Kind::Neg:
-			current_node->revertNeg(rp, to_visit);
+			shared_from_this()->revertNeg(rp);
 			break;
 		case Kind::Var:
-			current_node->revertVar(rp);
+			shared_from_this()->revertVar(rp);
 			break;
 	}
 }
 
-void Formula::revertRoot(SuperStack<Formula const*>& to_reverse) const {
-	to_reverse.push(left_child);
+void Formula::revertRoot(string& rp) {
+	if (left_child != nullptr) {
+		left_child->revertNode(rp);
+	}
 }
 
-void Formula::revertOp(string& rp, SuperStack<Formula const*>& to_reverse) const {
+void Formula::revertOp(string& rp) {
 	char s = getSymbol();
-	rp.push_back(s);
-	to_reverse.push(left_child);
-	to_reverse.push(right_child);
-}
-
-void Formula::revertNeg(string& rp, SuperStack<Formula const*>& to_reverse) const {
-	char s = getSymbol();
-	rp.push_back(s);
-	to_reverse.push(left_child);
-}
-
-void Formula::revertVar(string& rp) const {
-	char s = getSymbol();
+	if (left_child != nullptr) {
+		left_child->revertNode(rp);
+	}
+	if (right_child != nullptr) {
+		right_child->revertNode(rp);
+	}
 	rp.push_back(s);
 }
 
+void Formula::revertNeg(string& rp) {
+	char s = getSymbol();
+	if (left_child != nullptr) {
+		left_child->revertNode(rp);
+	}
+	rp.push_back(s);
+}
+
+void Formula::revertVar(string& rp) {
+	char s = getSymbol();
+	rp.push_back(s);
+}
+////////////////////////////////////////////////////////////////////////
 char Formula::getSymbol() const {
 	char s;
 	switch (kind) {
@@ -321,7 +331,7 @@ char Formula::getSymbol() const {
 			s = name;
 			break;
 		case Kind::Root:
-			throw(InternalException());
+			s = '\\';
 			break;
 	}
 	return s;
@@ -351,21 +361,20 @@ char Formula::getOpSymbol() const {
 	return (s);
 }
 
-void Formula::fromString(string& rp) {
-	SuperStack<Formula*> to_visit;
-	to_visit.push(this);
+void Formula::fromString(string rp) {
+	SuperStack<shared_ptr<Formula>> to_visit;
+	to_visit.push(shared_from_this());
 	while (!rp.empty()) {
 		addChildsFromString(rp, to_visit);
 	}
-	if (!to_visit.empty()) {
-		this->~Formula();
+	if (!to_visit.empty())
 		throw(InvalidStringException());
-	}
 }
 
-void Formula::addChildsFromString(string& rp, SuperStack<Formula*>& to_visit) {
+void Formula::addChildsFromString(string& rp, SuperStack<shared_ptr<Formula>>& to_visit) {
 	try {
-		Formula* current_node = to_visit.popout();
+		shared_ptr<Formula> current_node = to_visit.popout();
+
 		switch (current_node->kind) {
 			case Kind::Root:
 				current_node->addChildToRoot(rp, to_visit);
@@ -380,40 +389,40 @@ void Formula::addChildsFromString(string& rp, SuperStack<Formula*>& to_visit) {
 				throw(InvalidStringException());
 				break;
 		}
-	} catch (SuperStack<Formula*>::SuperStackEmptyException& e) {
+	} catch (SuperStack<shared_ptr<Formula>>::SuperStackEmptyException& e) {
 		cout << e.what() << "\n";
-		this->~Formula();
+		shared_from_this()->~Formula();
 		throw(InvalidStringException());
 	}
 }
 
-void Formula::addChildToRoot(string& rp, SuperStack<Formula*>& to_visit) {
+void Formula::addChildToRoot(string& rp, SuperStack<shared_ptr<Formula>>& to_visit) {
 	char s = extractNextSymbol(rp);
-	left_child = new Formula(s);
+	left_child = make_shared<Formula>(s);
 	if (left_child->kind != Kind::Var)
 		to_visit.push(left_child);
 }
 
-void Formula::addChildsToOp(string& rp, SuperStack<Formula*>& to_visit) {
+void Formula::addChildsToOp(string& rp, SuperStack<shared_ptr<Formula>>& to_visit) {
 	if (visited == Visit::First) {
 		char s = extractNextSymbol(rp);
-		right_child = new Formula(s);
-		to_visit.push(this);
+		right_child = make_shared<Formula>(s);
+		to_visit.push(shared_from_this());
 		if (right_child->kind != Kind::Var)
 			to_visit.push(right_child);
 		visited = Visit::Second;
 	} else if (visited == Visit::Second) {
 		char s = extractNextSymbol(rp);
-		left_child = new Formula(s);
+		left_child = make_shared<Formula>(s);
 		if (left_child->kind != Kind::Var)
 			to_visit.push(left_child);
 		visited = Visit::First;
 	}
 }
 
-void Formula::addChildToNeg(string& rp, SuperStack<Formula*>& to_visit) {
+void Formula::addChildToNeg(string& rp, SuperStack<shared_ptr<Formula>>& to_visit) {
 	char s = extractNextSymbol(rp);
-	left_child = new Formula(s);
+	left_child = make_shared<Formula>(s);
 	if (left_child->kind != Kind::Var)
 		to_visit.push(left_child);
 }
@@ -484,17 +493,17 @@ char Formula::charToName(char s) {
 }
 
 void Formula::print() {
-	SuperStack<Formula*> to_visit;
-	to_visit.push(this);
+	SuperStack<shared_ptr<Formula>> to_visit;
+	to_visit.push(shared_from_this());
 
 	while (!to_visit.empty()) {
-		Formula* node = to_visit.popout();
+		shared_ptr<Formula> node = to_visit.popout();
 		node->printNode(to_visit);
 	}
 	cout << endl;
 }
 
-void Formula::printNode(SuperStack<Formula*>& to_visit) {
+void Formula::printNode(SuperStack<shared_ptr<Formula>>& to_visit) {
 	switch (kind) {
 		case Kind::Root:
 			printRoot(to_visit);
@@ -511,16 +520,16 @@ void Formula::printNode(SuperStack<Formula*>& to_visit) {
 	}
 }
 
-void Formula::printRoot(SuperStack<Formula*>& to_visit) {
+void Formula::printRoot(SuperStack<shared_ptr<Formula>>& to_visit) {
 	to_visit.push(left_child);
 }
 
-void Formula::printOp(SuperStack<Formula*>& to_visit) {
+void Formula::printOp(SuperStack<shared_ptr<Formula>>& to_visit) {
 	if (visited == Visit::First) {
 		cout << '(';
-		to_visit.push(this);
+		to_visit.push(shared_from_this());
 		to_visit.push(right_child);
-		to_visit.push(this);
+		to_visit.push(shared_from_this());
 		to_visit.push(left_child);
 		visited = Visit::Second;
 	} else if (visited == Visit::Second) {
@@ -532,10 +541,10 @@ void Formula::printOp(SuperStack<Formula*>& to_visit) {
 	}
 }
 
-void Formula::printNeg(SuperStack<Formula*>& to_visit) {
+void Formula::printNeg(SuperStack<shared_ptr<Formula>>& to_visit) {
 	if (visited == Visit::First) {
-		cout << "![";
-		to_visit.push(this);
+		cout << "!" << "[";
+		to_visit.push(shared_from_this());
 		to_visit.push(left_child);
 		visited = Visit::Second;
 	} else if (visited == Visit::Second) {

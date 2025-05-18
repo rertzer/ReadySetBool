@@ -59,4 +59,5 @@ T SuperStack<T>::popout() {
 	this->pop();
 	return (top_element);
 }
+
 #endif

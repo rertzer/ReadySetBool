@@ -1,40 +1,55 @@
+#include <iostream>
 #include <vector>
 #include "nnf.hpp"
 
+using namespace std;
+
 int main() {
-	vector<string> rpolish;
-	rpolish.push_back("||");
-	rpolish.push_back("F>ABC&|");
-	rpolish.push_back("A");
-	rpolish.push_back("A!");
-	rpolish.push_back("AB&!");
-	rpolish.push_back("AB|!");
-	rpolish.push_back("AB>!");
-	rpolish.push_back("AB=!");
-	rpolish.push_back("ABC||");
-	rpolish.push_back("ABC||!");
-	rpolish.push_back("ABC|&");
-	rpolish.push_back("ABC&|");
-	rpolish.push_back("ABC&|!");
-	rpolish.push_back("ABC^^");
-	rpolish.push_back("ABC>>");
-	rpolish.push_back("AB|C&!");
-	rpolish.push_back("FG=");
-	rpolish.push_back("AB=!!");
-	rpolish.push_back("A!!!!B!!!^");
-	rpolish.push_back("A!!!!!!B!!!!!^");
-	rpolish.push_back("AB>");
-	rpolish.push_back("");
-	rpolish.push_back("AB^");
-	rpolish.push_back("ABCD&|&");
+	vector<pair<string, string>> rpolish;
+	// rpolish.push_back(make_pair("AB=!CE&DF!|=^", "??"));
+	// rpolish.push_back(make_pair("AB=!CE&DAD=!|=^", "??"));
+	rpolish.push_back(make_pair("A!", "A!"));
+	rpolish.push_back(make_pair("AB&!", "A!B!|"));
+	rpolish.push_back(make_pair("AB|!", "A!B!&"));
+	rpolish.push_back(make_pair("AB>!", "AB!&"));
+	rpolish.push_back(make_pair("AB=!", "AB!&BA!&|"));
+	rpolish.push_back(make_pair("ABC||", "ABC||"));
+	rpolish.push_back(make_pair("ABC||!", "A!B!C!&&"));
+	rpolish.push_back(make_pair("ABC&|", "ABC&|"));
+	rpolish.push_back(make_pair("ABC|&", "ABC|&"));
+	rpolish.push_back(make_pair("ABC&|!", "A!B!C!|&"));
+	rpolish.push_back(make_pair("ABC^^", "ABC!&B!C&|!&A!BC!&B!C&|&|"));
+	rpolish.push_back(make_pair("ABC>>", "A!B!C||"));
+	rpolish.push_back(make_pair("AB|!", "A!B!&"));
+	rpolish.push_back(make_pair("AB&!", "A!B!|"));
+	rpolish.push_back(make_pair("FG=", "F!G|G!F|&"));
+	rpolish.push_back(make_pair("AB=!!", "A!B|B!A|&"));
+	rpolish.push_back(make_pair("AB=", "A!B|B!A|& or AB&A!B!&|"));
+	rpolish.push_back(make_pair("A!!!!B!!!^", "A!B|AB!|&"));
+	rpolish.push_back(make_pair("A!!!!!!B!!!!!^", "A!B|AB!|&"));
+	rpolish.push_back(make_pair("AB>", "A!B|"));
+	rpolish.push_back(make_pair("AB^", "A!B!|AB|&"));
+	rpolish.push_back(make_pair("ABCD&|&", "ABCD&|&"));
+	rpolish.push_back(make_pair("", ""));
+	rpolish.push_back(make_pair("AB|C&!", "A!B!&C!|"));
+	rpolish.push_back(make_pair("AB|!", "A!B!&"));
+	rpolish.push_back(make_pair("AB|C&", "AB|C&"));
+	rpolish.push_back(make_pair("AB|C|D|", "AB|C|D|"));
+	rpolish.push_back(make_pair("AB&C&D&", "AB&C&D&"));
+	rpolish.push_back(make_pair("AB&!C!|", "A!B!|C!|"));
+	rpolish.push_back(make_pair("AB|!C!&", "A!B!&C!&"));
+	rpolish.push_back(make_pair("A!B!|!C&", "ABC&&"));
 
 	for (auto rp : rpolish) {
-		cout << "rpolish: " << rp << endl;
 		try {
-			string reverted = negation_normal_form(rp);
-			cout << reverted << "\n\n";
+			cout << "rpolish:  " << rp.first << endl;
+			string cnf = negation_normal_form(rp.first);
+			cout << "computed: " << cnf << endl;
+			cout << "expected: " << rp.second << endl << endl << endl;
 		} catch (const exception& e) {
-			cerr << e.what() << "\n\n";
+			cerr << e.what() << endl << endl;
 		}
 	}
 }
+
+// ((!A)| (((!!B)&(!!C))|((!B)&(!C))) ) & ((A)|(((!B)|(!C))&((B)|(C))))
