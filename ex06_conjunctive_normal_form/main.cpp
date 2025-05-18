@@ -1,5 +1,8 @@
+#include <iostream>
 #include <vector>
 #include "cnf.hpp"
+
+using namespace std;
 
 int main() {
 	vector<pair<string, string>> rpolish;

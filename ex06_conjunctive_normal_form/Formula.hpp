@@ -21,7 +21,6 @@ enum class Visit { First, Second, Third };
 class Formula : public enable_shared_from_this<Formula> {
    public:
 	Formula();
-	Formula(string rp);
 	Formula(char s);
 	Formula(Formula const& f);
 	Formula(Formula&& f);
@@ -33,7 +32,7 @@ class Formula : public enable_shared_from_this<Formula> {
 	void   kill();
 	void   rewrite();
 	void   erase();
-	void   fromString(string& reversePolish);
+	void   fromString(string reversePolish);
 	string revertPolish();
 	void   nnf();
 	void   cnf();
@@ -56,10 +55,10 @@ class Formula : public enable_shared_from_this<Formula> {
 	shared_ptr<Formula> addOp(string& rp);
 	shared_ptr<Formula> addNeg(string& rp);
 	shared_ptr<Formula> addVar(string& rp);
-	void				addChildsFromString(string& rp, SuperStack<weak_ptr<Formula>>& to_visit);
-	void				addChildToRoot(string& rp, SuperStack<weak_ptr<Formula>>& to_visit);
-	void				addChildsToOp(string& rp, SuperStack<weak_ptr<Formula>>& to_visit);
-	void				addChildToNeg(string& rp, SuperStack<weak_ptr<Formula>>& to_visit);
+	void				addChildsFromString(string& rp, SuperStack<shared_ptr<Formula>>& to_visit);
+	void				addChildToRoot(string& rp, SuperStack<shared_ptr<Formula>>& to_visit);
+	void				addChildsToOp(string& rp, SuperStack<shared_ptr<Formula>>& to_visit);
+	void				addChildToNeg(string& rp, SuperStack<shared_ptr<Formula>>& to_visit);
 	char				extractNextSymbol(string& rp);
 	Kind				charToKind(char s);
 	Op					charToOp(char s);
@@ -81,15 +80,15 @@ class Formula : public enable_shared_from_this<Formula> {
 	shared_ptr<Formula> rewriteMorganDis(SuperStack<weak_ptr<Formula>>& to_visit,
 										 shared_ptr<Formula>			child);
 	shared_ptr<Formula> negate();
-	void  revertNode(string& rp, string& ops, SuperStack<weak_ptr<Formula>>& to_reverse);
-	void  revertRoot(string& rp, string& ops, SuperStack<weak_ptr<Formula>>& to_reverse);
-	void  revertOp(string& rp, string& ops, SuperStack<weak_ptr<Formula>>& to_reverse);
-	void  revertNeg(string& rp, string& ops, SuperStack<weak_ptr<Formula>>& to_reverse);
+	void  revertNode(string& rp, string& ops, SuperStack<shared_ptr<Formula>>& to_reverse);
+	void  revertRoot(string& rp, string& ops, SuperStack<shared_ptr<Formula>>& to_reverse);
+	void  revertOp(string& rp, string& ops, SuperStack<shared_ptr<Formula>>& to_reverse);
+	void  revertNeg(string& rp, string& ops, SuperStack<shared_ptr<Formula>>& to_reverse);
 	void  revertVar(string& rp);
-	void  printNode(SuperStack<weak_ptr<Formula>>& to_visit);
-	void  printRoot(SuperStack<weak_ptr<Formula>>& to_visit);
-	void  printOp(SuperStack<weak_ptr<Formula>>& to_visit);
-	void  printNeg(SuperStack<weak_ptr<Formula>>& to_visit);
+	void  printNode(SuperStack<shared_ptr<Formula>>& to_visit);
+	void  printRoot(SuperStack<shared_ptr<Formula>>& to_visit);
+	void  printOp(SuperStack<shared_ptr<Formula>>& to_visit);
+	void  printNeg(SuperStack<shared_ptr<Formula>>& to_visit);
 	void  printVar();
 	void  printSymbol();
 	Kind  kind;

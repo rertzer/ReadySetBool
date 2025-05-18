@@ -1,7 +1,7 @@
 #ifndef CNF_HPP
 #define CNF_HPP
 
-#include "Formula.hpp"
+#include <string>
 
-string conjunctive_normal_form(string const& rp);
+std::string conjunctive_normal_form(std::string const& rp);
 #endif
