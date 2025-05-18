@@ -54,7 +54,6 @@ Formula::Formula(Formula&& f) : left_child(nullptr), right_child(nullptr) {
 }
 
 Formula::~Formula() {
-	addToTrash(this);
 	if (left_child != nullptr) {
 		delete left_child;
 	}
@@ -121,7 +120,7 @@ void Formula::rewrite() {
 void Formula::rewriteNode(SuperStack<Formula*>& to_visit) {
 	Formula* current_node = to_visit.popout();
 
-	if (isTrash(current_node)) {
+	if (to_visit.isTrash(current_node)) {
 		return;
 	}
 	if (current_node->left_child != nullptr) {
@@ -176,6 +175,7 @@ Formula* Formula::rewriteChild(SuperStack<Formula*>& to_visit, Formula* child) {
 Formula* Formula::rewriteMorganConj(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child;
 
+	to_visit.addToTrash(child);
 	child->kill();
 	kid->op = Op::Dis;
 	kid->left_child = kid->left_child->negate();
@@ -188,6 +188,7 @@ Formula* Formula::rewriteMorganConj(SuperStack<Formula*>& to_visit, Formula* chi
 Formula* Formula::rewriteMorganDis(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child;
 
+	to_visit.addToTrash(child);
 	child->kill();
 	kid->op = Op::Conj;
 	kid->left_child = kid->left_child->negate();
@@ -200,6 +201,8 @@ Formula* Formula::rewriteMorganDis(SuperStack<Formula*>& to_visit, Formula* chil
 Formula* Formula::rewriteDoubleNegation(SuperStack<Formula*>& to_visit, Formula* child) {
 	Formula* kid = child->left_child->left_child;
 
+	to_visit.addToTrash(child->left_child);
+	to_visit.addToTrash(child);
 	child->left_child->kill();
 	child->kill();
 	to_visit.push(this);
@@ -633,18 +636,3 @@ void Formula::printSymbol() {
 			break;
 	}
 }
-
-void Formula::addToTrash(Formula* f) {
-	trash.insert(f);
-}
-
-bool Formula::isTrash(Formula* f) {
-	bool					found = false;
-	set<Formula*>::iterator it = trash.find(f);
-	if (it != trash.end()) {
-		found = true;
-	}
-	return (found);
-}
-
-set<Formula*> Formula::trash;
